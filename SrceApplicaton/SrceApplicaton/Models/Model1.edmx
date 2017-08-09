@@ -1,0 +1,334 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="SrceModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Job">
+          <Key>
+            <PropertyRef Name="JobID" />
+          </Key>
+          <Property Name="JobID" Type="smallint" Nullable="false" />
+          <Property Name="StartingHour" Type="time" Precision="0" Nullable="false" />
+          <Property Name="EndingHour" Type="time" Precision="0" Nullable="false" />
+          <Property Name="JobNotes" Type="nvarchar" MaxLength="200" />
+          <Property Name="JobDate" Type="date" Nullable="false" />
+          <Property Name="TemplateID" Type="tinyint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="JobTechnician">
+          <Key>
+            <PropertyRef Name="JobID" />
+            <PropertyRef Name="TechnicianID" />
+          </Key>
+          <Property Name="JobID" Type="smallint" Nullable="false" />
+          <Property Name="TechnicianID" Type="smallint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="JobTemplates">
+          <Key>
+            <PropertyRef Name="TemplateID" />
+          </Key>
+          <Property Name="TemplateID" Type="tinyint" Nullable="false" />
+          <Property Name="Chairs" Type="tinyint" />
+          <Property Name="ChairLayout" Type="nvarchar" MaxLength="20" />
+          <Property Name="Tables" Type="tinyint" />
+          <Property Name="TablesLayout" Type="nvarchar" MaxLength="20" />
+          <Property Name="ExtraNotes" Type="nvarchar" MaxLength="50" />
+          <Property Name="Wall" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Technician">
+          <Key>
+            <PropertyRef Name="TechnicianID" />
+          </Key>
+          <Property Name="TechnicianID" Type="smallint" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="LastName" Type="nvarchar" MaxLength="20" Nullable="false" />
+          <Property Name="PhoneNumber" Type="text" />
+          <Property Name="DateOfBirth" Type="date" />
+          <Property Name="DateHired" Type="date" />
+          <Property Name="Color" Type="char" MaxLength="10" />
+          <Property Name="email" Type="nvarchar" MaxLength="30" />
+          <Property Name="Username" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="AccessLevel" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="Password" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="StatsID" Type="smallint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="TechnicianStats">
+          <Key>
+            <PropertyRef Name="StatsID" />
+          </Key>
+          <Property Name="StatsID" Type="smallint" Nullable="false" />
+          <Property Name="WorkHours" Type="smallint" />
+          <Property Name="ThisMonthSalary" Type="smallint" />
+          <Property Name="ThisYearSalary" Type="smallint" />
+          <Property Name="LastMonthSalary" Type="smallint" />
+        </EntityType>
+        <Association Name="FK_Job_ToTable">
+          <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
+          <End Role="Job" Type="Self.Job" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="JobTemplates">
+              <PropertyRef Name="TemplateID" />
+            </Principal>
+            <Dependent Role="Job">
+              <PropertyRef Name="TemplateID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_JobTechnician_ToTable">
+          <End Role="Job" Type="Self.Job" Multiplicity="1" />
+          <End Role="JobTechnician" Type="Self.JobTechnician" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Job">
+              <PropertyRef Name="JobID" />
+            </Principal>
+            <Dependent Role="JobTechnician">
+              <PropertyRef Name="JobID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_JobTechnician_ToTable_1">
+          <End Role="Technician" Type="Self.Technician" Multiplicity="1" />
+          <End Role="JobTechnician" Type="Self.JobTechnician" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Technician">
+              <PropertyRef Name="TechnicianID" />
+            </Principal>
+            <Dependent Role="JobTechnician">
+              <PropertyRef Name="TechnicianID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Technician_ToTable">
+          <End Role="TechnicianStats" Type="Self.TechnicianStats" Multiplicity="1" />
+          <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TechnicianStats">
+              <PropertyRef Name="StatsID" />
+            </Principal>
+            <Dependent Role="Technician">
+              <PropertyRef Name="StatsID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="SrceModelStoreContainer">
+          <EntitySet Name="Job" EntityType="Self.Job" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="JobTechnician" EntityType="Self.JobTechnician" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Technician" EntityType="Self.Technician" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
+            <End Role="JobTemplates" EntitySet="JobTemplates" />
+            <End Role="Job" EntitySet="Job" />
+          </AssociationSet>
+          <AssociationSet Name="FK_JobTechnician_ToTable" Association="Self.FK_JobTechnician_ToTable">
+            <End Role="Job" EntitySet="Job" />
+            <End Role="JobTechnician" EntitySet="JobTechnician" />
+          </AssociationSet>
+          <AssociationSet Name="FK_JobTechnician_ToTable_1" Association="Self.FK_JobTechnician_ToTable_1">
+            <End Role="Technician" EntitySet="Technician" />
+            <End Role="JobTechnician" EntitySet="JobTechnician" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Technician_ToTable" Association="Self.FK_Technician_ToTable">
+            <End Role="TechnicianStats" EntitySet="TechnicianStats" />
+            <End Role="Technician" EntitySet="Technician" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="SrceModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Job">
+          <Key>
+            <PropertyRef Name="JobID" />
+          </Key>
+          <Property Name="JobID" Type="Int16" Nullable="false" />
+          <Property Name="StartingHour" Type="Time" Nullable="false" Precision="0" />
+          <Property Name="EndingHour" Type="Time" Nullable="false" Precision="0" />
+          <Property Name="JobNotes" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="JobDate" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="TemplateID" Type="Byte" Nullable="false" />
+          <NavigationProperty Name="JobTemplates" Relationship="Self.FK_Job_ToTable" FromRole="Job" ToRole="JobTemplates" />
+          <NavigationProperty Name="Technician" Relationship="Self.JobTechnician" FromRole="Job" ToRole="Technician" />
+        </EntityType>
+        <EntityType Name="JobTemplates">
+          <Key>
+            <PropertyRef Name="TemplateID" />
+          </Key>
+          <Property Name="TemplateID" Type="Byte" Nullable="false" />
+          <Property Name="Chairs" Type="Byte" />
+          <Property Name="ChairLayout" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="Tables" Type="Byte" />
+          <Property Name="TablesLayout" Type="String" MaxLength="20" FixedLength="false" Unicode="true" />
+          <Property Name="ExtraNotes" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Wall" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Job" Relationship="Self.FK_Job_ToTable" FromRole="JobTemplates" ToRole="Job" />
+        </EntityType>
+        <EntityType Name="Technician">
+          <Key>
+            <PropertyRef Name="TechnicianID" />
+          </Key>
+          <Property Name="TechnicianID" Type="Int16" Nullable="false" />
+          <Property Name="Name" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="LastName" Type="String" MaxLength="20" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PhoneNumber" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="DateOfBirth" Type="DateTime" Precision="0" />
+          <Property Name="DateHired" Type="DateTime" Precision="0" />
+          <Property Name="Color" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="email" Type="String" MaxLength="30" FixedLength="false" Unicode="true" />
+          <Property Name="Username" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AccessLevel" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="Password" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="StatsID" Type="Int16" Nullable="false" />
+          <NavigationProperty Name="TechnicianStats" Relationship="Self.FK_Technician_ToTable" FromRole="Technician" ToRole="TechnicianStats" />
+          <NavigationProperty Name="Job" Relationship="Self.JobTechnician" FromRole="Technician" ToRole="Job" />
+        </EntityType>
+        <EntityType Name="TechnicianStats">
+          <Key>
+            <PropertyRef Name="StatsID" />
+          </Key>
+          <Property Name="StatsID" Type="Int16" Nullable="false" />
+          <Property Name="WorkHours" Type="Int16" />
+          <Property Name="ThisMonthSalary" Type="Int16" />
+          <Property Name="ThisYearSalary" Type="Int16" />
+          <Property Name="LastMonthSalary" Type="Int16" />
+          <NavigationProperty Name="Technician" Relationship="Self.FK_Technician_ToTable" FromRole="TechnicianStats" ToRole="Technician" />
+        </EntityType>
+        <Association Name="FK_Job_ToTable">
+          <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
+          <End Role="Job" Type="Self.Job" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="JobTemplates">
+              <PropertyRef Name="TemplateID" />
+            </Principal>
+            <Dependent Role="Job">
+              <PropertyRef Name="TemplateID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Technician_ToTable">
+          <End Role="TechnicianStats" Type="Self.TechnicianStats" Multiplicity="1" />
+          <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="TechnicianStats">
+              <PropertyRef Name="StatsID" />
+            </Principal>
+            <Dependent Role="Technician">
+              <PropertyRef Name="StatsID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="JobTechnician">
+          <End Role="Job" Type="Self.Job" Multiplicity="*" />
+          <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
+        </Association>
+        <EntityContainer Name="SrceAppDatabase1Entities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Job" EntityType="Self.Job" />
+          <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" />
+          <EntitySet Name="Technician" EntityType="Self.Technician" />
+          <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" />
+          <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
+            <End Role="JobTemplates" EntitySet="JobTemplates" />
+            <End Role="Job" EntitySet="Job" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Technician_ToTable" Association="Self.FK_Technician_ToTable">
+            <End Role="TechnicianStats" EntitySet="TechnicianStats" />
+            <End Role="Technician" EntitySet="Technician" />
+          </AssociationSet>
+          <AssociationSet Name="JobTechnician" Association="Self.JobTechnician">
+            <End Role="Job" EntitySet="Job" />
+            <End Role="Technician" EntitySet="Technician" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="SrceModelStoreContainer" CdmEntityContainer="SrceAppDatabase1Entities">
+          <EntitySetMapping Name="Job">
+            <EntityTypeMapping TypeName="SrceModel.Job">
+              <MappingFragment StoreEntitySet="Job">
+                <ScalarProperty Name="JobID" ColumnName="JobID" />
+                <ScalarProperty Name="StartingHour" ColumnName="StartingHour" />
+                <ScalarProperty Name="EndingHour" ColumnName="EndingHour" />
+                <ScalarProperty Name="JobNotes" ColumnName="JobNotes" />
+                <ScalarProperty Name="JobDate" ColumnName="JobDate" />
+                <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="JobTemplates">
+            <EntityTypeMapping TypeName="SrceModel.JobTemplates">
+              <MappingFragment StoreEntitySet="JobTemplates">
+                <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
+                <ScalarProperty Name="Chairs" ColumnName="Chairs" />
+                <ScalarProperty Name="ChairLayout" ColumnName="ChairLayout" />
+                <ScalarProperty Name="Tables" ColumnName="Tables" />
+                <ScalarProperty Name="TablesLayout" ColumnName="TablesLayout" />
+                <ScalarProperty Name="ExtraNotes" ColumnName="ExtraNotes" />
+                <ScalarProperty Name="Wall" ColumnName="Wall" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Technician">
+            <EntityTypeMapping TypeName="SrceModel.Technician">
+              <MappingFragment StoreEntitySet="Technician">
+                <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="DateHired" ColumnName="DateHired" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="Username" ColumnName="Username" />
+                <ScalarProperty Name="AccessLevel" ColumnName="AccessLevel" />
+                <ScalarProperty Name="Password" ColumnName="Password" />
+                <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="TechnicianStats">
+            <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
+              <MappingFragment StoreEntitySet="TechnicianStats">
+                <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+                <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
+                <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+                <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+                <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="JobTechnician" TypeName="SrceModel.JobTechnician" StoreEntitySet="JobTechnician">
+            <EndProperty Name="Job">
+              <ScalarProperty Name="JobID" ColumnName="JobID" />
+            </EndProperty>
+            <EndProperty Name="Technician">
+              <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
+            </EndProperty>
+          </AssociationSetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+  <EntityContainerMapping StorageEntityContainer="SrceModelStoreContainer" CdmEntityContainer="SrceAppDatabase1Entities">
+    <EntitySetMapping Name="Job">
+      <EntityTypeMapping TypeName="SrceModel.Job">
+        <MappingFragment StoreEntitySet="Job">
+          <ScalarProperty Name="JobID" ColumnName="JobID" />
+          <ScalarProperty Name="StartingHour" ColumnName="StartingHour" />
+          <ScalarProperty Name="EndingHour" ColumnName="EndingHour" />
+          <ScalarProperty Name="JobNotes" ColumnName="JobNotes" />
+          <ScalarProperty Name="JobDate" ColumnName="JobDate" />
+          <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="JobTemplates">
+      <EntityTypeMapping TypeName="SrceModel.JobTemplates">
+        <MappingFragment StoreEntitySet="JobTemplates">
+          <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
+          <ScalarProperty Name="Chairs" ColumnName="Chairs" />
+          <ScalarProperty Name="ChairLayout" ColumnName="ChairLayout" />
+          <ScalarProperty Name="Tables" ColumnName="Tables" />
+          <ScalarProperty Name="TablesLayout" ColumnName="TablesLayout" />
+          <ScalarProperty Name="ExtraNotes" ColumnName="ExtraNotes" />
+          <ScalarProperty Name="Wall" ColumnName="Wall" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="Technician">
+      <EntityTypeMapping TypeName="SrceModel.Technician">
+        <MappingFragment StoreEntitySet="Technician">
+          <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
+          <ScalarProperty Name="Name" ColumnName="Name" />
+          <ScalarProperty Name="LastName" ColumnName="LastName" />
+          <ScalarProperty Name="PhoneNumber" ColumnName="PhoneNumber" />
+          <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+          <ScalarProperty Name="DateHired" ColumnName="DateHired" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
+          <ScalarProperty Name="email" ColumnName="email" />
+          <ScalarProperty Name="Username" ColumnName="Username" />
+          <ScalarProperty Name="AccessLevel" ColumnName="AccessLevel" />
+          <ScalarProperty Name="Password" ColumnName="Password" />
+          <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <EntitySetMapping Name="TechnicianStats">
+      <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
+        <MappingFragment StoreEntitySet="TechnicianStats">
+          <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+          <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
+          <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+          <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+          <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
+    <AssociationSetMapping Name="JobTechnician" TypeName="SrceModel.JobTechnician" StoreEntitySet="JobTechnician">
+      <EndProperty Name="Job">
+        <ScalarProperty Name="JobID" ColumnName="JobID" />
+      </EndProperty>
+      <EndProperty Name="Technician">
+        <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
+      </EndProperty>
+    </AssociationSetMapping>
+  </EntityContainerMapping>
+</Mapping>
