@@ -51,17 +51,10 @@
           <Property Name="Username" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="AccessLevel" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="Password" Type="varchar" MaxLength="20" Nullable="false" />
-          <Property Name="StatsID" Type="smallint" Nullable="false" />
-        </EntityType>
-        <EntityType Name="TechnicianStats">
-          <Key>
-            <PropertyRef Name="StatsID" />
-          </Key>
-          <Property Name="StatsID" Type="smallint" Nullable="false" />
-          <Property Name="WorkHours" Type="smallint" />
-          <Property Name="ThisMonthSalary" Type="smallint" />
-          <Property Name="ThisYearSalary" Type="smallint" />
-          <Property Name="LastMonthSalary" Type="smallint" />
+          <Property Name="WorkHours" Type="tinyint" />
+          <Property Name="ThisMonthSalary" Type="tinyint" />
+          <Property Name="ThisYearSalary" Type="tinyint" />
+          <Property Name="LastMonthSalary" Type="tinyint" />
         </EntityType>
         <Association Name="FK_Job_ToTable">
           <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
@@ -99,24 +92,11 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Technician_ToTable">
-          <End Role="TechnicianStats" Type="Self.TechnicianStats" Multiplicity="1" />
-          <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TechnicianStats">
-              <PropertyRef Name="StatsID" />
-            </Principal>
-            <Dependent Role="Technician">
-              <PropertyRef Name="StatsID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityContainer Name="SrceModelStoreContainer">
           <EntitySet Name="Job" EntityType="Self.Job" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="JobTechnician" EntityType="Self.JobTechnician" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Technician" EntityType="Self.Technician" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
             <End Role="JobTemplates" EntitySet="JobTemplates" />
             <End Role="Job" EntitySet="Job" />
@@ -128,10 +108,6 @@
           <AssociationSet Name="FK_JobTechnician_ToTable_1" Association="Self.FK_JobTechnician_ToTable_1">
             <End Role="Technician" EntitySet="Technician" />
             <End Role="JobTechnician" EntitySet="JobTechnician" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Technician_ToTable" Association="Self.FK_Technician_ToTable">
-            <End Role="TechnicianStats" EntitySet="TechnicianStats" />
-            <End Role="Technician" EntitySet="Technician" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -179,20 +155,11 @@
           <Property Name="Username" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="AccessLevel" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
           <Property Name="Password" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="StatsID" Type="Int16" Nullable="false" />
-          <NavigationProperty Name="TechnicianStats" Relationship="Self.FK_Technician_ToTable" FromRole="Technician" ToRole="TechnicianStats" />
           <NavigationProperty Name="Job" Relationship="Self.JobTechnician" FromRole="Technician" ToRole="Job" />
-        </EntityType>
-        <EntityType Name="TechnicianStats">
-          <Key>
-            <PropertyRef Name="StatsID" />
-          </Key>
-          <Property Name="StatsID" Type="Int16" Nullable="false" />
-          <Property Name="WorkHours" Type="Int16" />
-          <Property Name="ThisMonthSalary" Type="Int16" />
-          <Property Name="ThisYearSalary" Type="Int16" />
-          <Property Name="LastMonthSalary" Type="Int16" />
-          <NavigationProperty Name="Technician" Relationship="Self.FK_Technician_ToTable" FromRole="TechnicianStats" ToRole="Technician" />
+          <Property Name="WorkHours" Type="Byte" />
+          <Property Name="ThisMonthSalary" Type="Byte" />
+          <Property Name="ThisYearSalary" Type="Byte" />
+          <Property Name="LastMonthSalary" Type="Byte" />
         </EntityType>
         <Association Name="FK_Job_ToTable">
           <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
@@ -206,18 +173,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Technician_ToTable">
-          <End Role="TechnicianStats" Type="Self.TechnicianStats" Multiplicity="1" />
-          <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="TechnicianStats">
-              <PropertyRef Name="StatsID" />
-            </Principal>
-            <Dependent Role="Technician">
-              <PropertyRef Name="StatsID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="JobTechnician">
           <End Role="Job" Type="Self.Job" Multiplicity="*" />
           <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
@@ -226,14 +181,9 @@
           <EntitySet Name="Job" EntityType="Self.Job" />
           <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" />
           <EntitySet Name="Technician" EntityType="Self.Technician" />
-          <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" />
           <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
             <End Role="JobTemplates" EntitySet="JobTemplates" />
             <End Role="Job" EntitySet="Job" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Technician_ToTable" Association="Self.FK_Technician_ToTable">
-            <End Role="TechnicianStats" EntitySet="TechnicianStats" />
-            <End Role="Technician" EntitySet="Technician" />
           </AssociationSet>
           <AssociationSet Name="JobTechnician" Association="Self.JobTechnician">
             <End Role="Job" EntitySet="Job" />
@@ -274,6 +224,10 @@
           <EntitySetMapping Name="Technician">
             <EntityTypeMapping TypeName="SrceModel.Technician">
               <MappingFragment StoreEntitySet="Technician">
+                <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+                <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+                <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+                <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
                 <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="LastName" ColumnName="LastName" />
@@ -285,18 +239,6 @@
                 <ScalarProperty Name="Username" ColumnName="Username" />
                 <ScalarProperty Name="AccessLevel" ColumnName="AccessLevel" />
                 <ScalarProperty Name="Password" ColumnName="Password" />
-                <ScalarProperty Name="StatsID" ColumnName="StatsID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="TechnicianStats">
-            <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
-              <MappingFragment StoreEntitySet="TechnicianStats">
-                <ScalarProperty Name="StatsID" ColumnName="StatsID" />
-                <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
-                <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
-                <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
-                <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

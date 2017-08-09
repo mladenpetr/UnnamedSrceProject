@@ -28,6 +28,5 @@ namespace SrceApplicaton.Models
         public virtual DbSet<Job> Job { get; set; }
         public virtual DbSet<JobTemplates> JobTemplates { get; set; }
         public virtual DbSet<Technician> Technician { get; set; }
-        public virtual DbSet<TechnicianStats> TechnicianStats { get; set; }
     }
 }

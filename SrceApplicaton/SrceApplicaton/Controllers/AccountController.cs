@@ -50,18 +50,14 @@ namespace SrceApplicaton.Controllers
                     email = model.email,
                     Username = model.Username,
                     Password = model.Password,
-                    AccessLevel = "Technician"
+                    AccessLevel = "Technician",
+                    WorkHours = 0,
+                    ThisMonthSalary = 0,
+                    LastMonthSalary = 0,
+                    ThisYearSalary = 0
                     
                 };
-                TechnicianStats newUserStats = new TechnicianStats
-                {
-                    WorkHours = 0,
-                    LastMonthSalary = 0,
-                    ThisMonthSalary = 0,
-                    ThisYearSalary = 0,
-                };
                 db.Technician.Add(newUser);
-                db.TechnicianStats.Add(newUserStats);
                 db.SaveChanges();
                 TempData["message"] = "Uspješno ste registrirali račun. Možete se ulogirati sa kreiranim podacima";
                 return RedirectToAction("Index", "Home");

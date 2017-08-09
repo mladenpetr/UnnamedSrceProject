@@ -29,6 +29,10 @@
     <EntitySetMapping Name="Technician">
       <EntityTypeMapping TypeName="SrceModel.Technician">
         <MappingFragment StoreEntitySet="Technician">
+          <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+          <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+          <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+          <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
           <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
           <ScalarProperty Name="Name" ColumnName="Name" />
           <ScalarProperty Name="LastName" ColumnName="LastName" />
@@ -40,18 +44,6 @@
           <ScalarProperty Name="Username" ColumnName="Username" />
           <ScalarProperty Name="AccessLevel" ColumnName="AccessLevel" />
           <ScalarProperty Name="Password" ColumnName="Password" />
-          <ScalarProperty Name="StatsID" ColumnName="StatsID" />
-        </MappingFragment>
-      </EntityTypeMapping>
-    </EntitySetMapping>
-    <EntitySetMapping Name="TechnicianStats">
-      <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
-        <MappingFragment StoreEntitySet="TechnicianStats">
-          <ScalarProperty Name="StatsID" ColumnName="StatsID" />
-          <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
-          <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
-          <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
-          <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
         </MappingFragment>
       </EntityTypeMapping>
     </EntitySetMapping>

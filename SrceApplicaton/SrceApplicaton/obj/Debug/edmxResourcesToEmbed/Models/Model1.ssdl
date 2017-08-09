@@ -46,17 +46,10 @@
     <Property Name="Username" Type="varchar" MaxLength="20" Nullable="false" />
     <Property Name="AccessLevel" Type="varchar" MaxLength="10" Nullable="false" />
     <Property Name="Password" Type="varchar" MaxLength="20" Nullable="false" />
-    <Property Name="StatsID" Type="smallint" Nullable="false" />
-  </EntityType>
-  <EntityType Name="TechnicianStats">
-    <Key>
-      <PropertyRef Name="StatsID" />
-    </Key>
-    <Property Name="StatsID" Type="smallint" Nullable="false" />
-    <Property Name="WorkHours" Type="smallint" />
-    <Property Name="ThisMonthSalary" Type="smallint" />
-    <Property Name="ThisYearSalary" Type="smallint" />
-    <Property Name="LastMonthSalary" Type="smallint" />
+    <Property Name="WorkHours" Type="tinyint" />
+    <Property Name="ThisMonthSalary" Type="tinyint" />
+    <Property Name="ThisYearSalary" Type="tinyint" />
+    <Property Name="LastMonthSalary" Type="tinyint" />
   </EntityType>
   <Association Name="FK_Job_ToTable">
     <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
@@ -94,24 +87,11 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
-  <Association Name="FK_Technician_ToTable">
-    <End Role="TechnicianStats" Type="Self.TechnicianStats" Multiplicity="1" />
-    <End Role="Technician" Type="Self.Technician" Multiplicity="*" />
-    <ReferentialConstraint>
-      <Principal Role="TechnicianStats">
-        <PropertyRef Name="StatsID" />
-      </Principal>
-      <Dependent Role="Technician">
-        <PropertyRef Name="StatsID" />
-      </Dependent>
-    </ReferentialConstraint>
-  </Association>
   <EntityContainer Name="SrceModelStoreContainer">
     <EntitySet Name="Job" EntityType="Self.Job" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="JobTechnician" EntityType="Self.JobTechnician" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Technician" EntityType="Self.Technician" Schema="dbo" store:Type="Tables" />
-    <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" Schema="dbo" store:Type="Tables" />
     <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
       <End Role="JobTemplates" EntitySet="JobTemplates" />
       <End Role="Job" EntitySet="Job" />
@@ -123,10 +103,6 @@
     <AssociationSet Name="FK_JobTechnician_ToTable_1" Association="Self.FK_JobTechnician_ToTable_1">
       <End Role="Technician" EntitySet="Technician" />
       <End Role="JobTechnician" EntitySet="JobTechnician" />
-    </AssociationSet>
-    <AssociationSet Name="FK_Technician_ToTable" Association="Self.FK_Technician_ToTable">
-      <End Role="TechnicianStats" EntitySet="TechnicianStats" />
-      <End Role="Technician" EntitySet="Technician" />
     </AssociationSet>
   </EntityContainer>
 </Schema>

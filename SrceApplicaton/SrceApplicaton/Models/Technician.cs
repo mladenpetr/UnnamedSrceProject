@@ -31,9 +31,11 @@ namespace SrceApplicaton.Models
         public string Username { get; set; }
         public string AccessLevel { get; set; }
         public string Password { get; set; }
-        public short StatsID { get; set; }
+        public Nullable<byte> WorkHours { get; set; }
+        public Nullable<byte> ThisMonthSalary { get; set; }
+        public Nullable<byte> ThisYearSalary { get; set; }
+        public Nullable<byte> LastMonthSalary { get; set; }
     
-        public virtual TechnicianStats TechnicianStats { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Job> Job { get; set; }
     }
