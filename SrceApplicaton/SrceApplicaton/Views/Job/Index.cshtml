@@ -1,4 +1,5 @@
-﻿
+﻿@model IEnumerable<SrceApplicaton.Models.Job>
+
 @{
     ViewBag.Title = "Index";
 }
@@ -10,44 +11,71 @@
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
     <script type="text/javascript">
-            $(document).ready(function () {
-                $('#calendar').fullCalendar({
+        //lista poslova koja se puni uzastopnim pozivima funkcije addEventToList
+        var events = [];
+            @foreach (var job in Model)
+            {
+                string month = job.JobDate.Month < 10 ? "0" + job.JobDate.Month.ToString() : job.JobDate.Month.ToString();
+                var date = job.JobDate.Year + "-" +month + "-" + job.JobDate.Day;
+                @:addEventToList("@job.JobID","@date","@job.StartingHour","@job.EndingHour");
+            }
+            function addEventToList(jobID, date, startHour, endHour) {
+                var event = {
+                    title: jobID,
+                    start: date + "T" + startHour,
+                    end: date + "T" + endHour
+                };
+                events.push(event);
+                return;
+            }
+        $(document).ready(function () {
+            $('#calendar').fullCalendar({
                     theme: true,
-                    header: {
+                header: {
                         left: 'prev,next,today',
-                        center: 'title',
-                        right: 'month,agendaWeek,agendaDay'
-                    },
-                    firstDay: 6,
-                    businessHours: {
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                firstDay: 6,
+                businessHours: {
                         // days of week. an array of zero-based day of week integers (0=Sunday)
                         dow: [1, 2, 3, 4, 5], // Monday - Friday
 
-                        start: '08:00', // a start time (8am in this example)
-                        end: '18:00', // an end time (6pm in this example)
-                    },
-                    defaultView: 'agendaDay',
-                    editable: true,
-                    allDaySlot: false,
-                    selectable: true,
-                    events: [
-                        {
-                            title: 'event1',
-                            start: '2017-08-22'
-                        },
-                        {
-                            title: 'event2',
-                            start: '2017-08-23',
-                            end: '2017-08-24'
-                        },
-                        {
-                            title: 'event3',
-                            start: '2017-08-24T12:30:00',
-                            allDay: false // will make the time show
+                    start: '08:00', // a start time (8am in this example)
+                    end: '18:00', // an end time (6pm in this example)
+                },
+                defaultView: 'agendaDay',
+                editable: true,
+                allDaySlot: false,
+                selectable: true,
+                eventClick: function (calEvent, jsEvent, view) {
+                    //Kada korisnik klikne na postojeći event
+                    //...
+                    alert('Kliknut je event!')
+                },
+
+                dayClick: function (date, jsEvent, view) {
+                    //Kada korisnik klikne na kalendar (gdje nema eventa)
+                    //..
+                    //alert('Kliknut je kalendar!' + date.format('hh:mm'))
+                    //alert('Završava ' + date.add(2, 'hour').format('hh:mm'))
+                    var urltoAction = '@Url.Action("Create", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'start': date.format(),
+                            'end': date.add(2, 'hour').format()
                         }
-                    ]
-                });
-            });
+                    }).done(function () {
+                        alert('Posao je dodan!')
+                        }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+                }
+            })
+            //Dodaj sve postojeće evente iz baze u kalendar
+            $('#calendar').fullCalendar('addEventSource', events)
+        });
     </script>
 </head>
 <body>

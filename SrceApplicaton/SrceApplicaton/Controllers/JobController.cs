@@ -13,7 +13,7 @@ namespace SrceApplicaton.Controllers
         // GET: Job
         public ActionResult Index()
         {
-            return View();
+            return View(db.Job.ToList());
         }
 
         // GET: Job/Details/5
@@ -23,8 +23,31 @@ namespace SrceApplicaton.Controllers
         }
 
         // GET: Job/Create
-        public ActionResult Create()
+        public ActionResult Create(string start,string end)
         {
+            byte tempID = (byte)db.JobTemplates.Count();
+            if (ModelState.IsValid)
+            {
+                Job newJob = new Job
+                {
+                    JobID = (short)db.Job.Count(),
+                    StartingHour = TimeSpan.Parse(start.Split('T')[1]),
+                    EndingHour = TimeSpan.Parse(end.Split('T')[1]),
+                    JobDate = DateTime.Parse(start.Split('T')[0]),
+                    TemplateID = tempID
+                };
+
+                JobTemplates template = new JobTemplates
+                {
+                    TemplateID = tempID,
+                    Wall = false
+                };
+                db.Job.Add(newJob);
+                db.JobTemplates.Add(template);
+                db.SaveChanges();
+                TempData["message"] = "Posao je uspješno dodan!";
+                return RedirectToAction("Index", "Job");
+            }
             return View();
         }
 
