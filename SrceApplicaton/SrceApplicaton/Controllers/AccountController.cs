@@ -7,6 +7,7 @@ using System.Linq;
 using System.Web;
 using System.Security.Principal;
 using System.Web.Security;
+using System.Collections.Generic;
 
 namespace SrceApplicaton.Controllers
 {
@@ -38,9 +39,14 @@ namespace SrceApplicaton.Controllers
         {
             if (ModelState.IsValid)
             {
+                List<short> techIds = new List<short>(db.Technician.Count());
+                foreach (Technician tech in db.Technician)
+                {
+                    techIds.Add(tech.TechnicianID);
+                }
                 Technician newUser = new Technician
                 {
-                    TechnicianID = (short)(db.Technician.Count()),
+                    TechnicianID = new JobController().checkId(techIds),
                     Name = model.Name,
                     LastName = model.LastName,
                     PhoneNumber = model.PhoneNumber,

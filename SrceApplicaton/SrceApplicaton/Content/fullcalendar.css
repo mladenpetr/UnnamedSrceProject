@@ -313,6 +313,10 @@ previous button's border...
 	float: right;
 }
 
+.edit,.add{
+}
+
+
 /* unthemed */
 
 .fc-unthemed .fc-popover {

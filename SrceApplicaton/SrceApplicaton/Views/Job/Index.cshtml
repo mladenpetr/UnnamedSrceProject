@@ -1,4 +1,5 @@
-﻿
+﻿@model IEnumerable<SrceApplicaton.Models.Job>
+
 @{
     ViewBag.Title = "Index";
 }
@@ -10,49 +11,139 @@
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
     <script type="text/javascript">
-            $(document).ready(function () {
-                $('#calendar').fullCalendar({
-                    theme: true,
-                    header: {
-                        left: 'prev,next,today',
-                        center: 'title',
-                        right: 'month,agendaWeek,agendaDay'
-                    },
-                    firstDay: 6,
-                    businessHours: {
-                        // days of week. an array of zero-based day of week integers (0=Sunday)
-                        dow: [1, 2, 3, 4, 5], // Monday - Friday
+        //lista poslova koja se puni uzastopnim pozivima funkcije addEventToList
+        //month varijabla sadrži dvoznamenkastu reprezentaciju mjeseca
+        //date varijabla sadrži pravilno formatiran datum za prikaz na kalendar
+        var events = [];
 
-                        start: '08:00', // a start time (8am in this example)
-                        end: '18:00', // an end time (6pm in this example)
-                    },
-                    defaultView: 'agendaDay',
-                    editable: true,
-                    allDaySlot: false,
-                    selectable: true,
-                    events: [
-                        {
-                            title: 'event1',
-                            start: '2017-08-22'
-                        },
-                        {
-                            title: 'event2',
-                            start: '2017-08-23',
-                            end: '2017-08-24'
-                        },
-                        {
-                            title: 'event3',
-                            start: '2017-08-24T12:30:00',
-                            allDay: false // will make the time show
+        function addEvents() {
+            @foreach (var job in Model)
+            {
+                string month = job.JobDate.Month < 10 ? "0" + job.JobDate.Month.ToString() : job.JobDate.Month.ToString();
+                var date = job.JobDate.Year + "-" +month + "-" + job.JobDate.Day;
+                @:addEventToList("@job.JobID", "@date", "@job.StartingHour", "@job.EndingHour");
+            }
+        }
+            function addEventToList(jobID, date, startHour, endHour) {
+                var event = {
+                    id: jobID,
+                    start: date + "T" + startHour,
+                    end: date + "T" + endHour
+                };
+                events.push(event);
+                return;
+        }
+            addEvents();
+           //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
+            var mouseX, mouseY;
+            var currentDate;
+            var currentEvent;
+
+            function addEvent() {
+                var urltoAction = '@Url.Action("Create", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'start': currentDate.format(),
+                            'end': currentDate.add(2, 'hour').format()
                         }
-                    ]
-                });
+                    }).done(function () {
+                        $('.add').hide();
+                    }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+            }
+
+            function editEvent() {
+                var urltoAction = '@Url.Action("Edit", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'id': currentEvent.id
+                        }
+                    }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+            }
+
+            function deleteEvent() {
+                var urltoAction = '@Url.Action("Delete", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'id': currentEvent.id
+                        }
+                    }).done(function () {
+                        $('.edit').hide();
+                    }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+            }
+
+        //praćenje koordinata miša zbog pozicioniranja menia pri kliku
+            $(document).mousemove(function (e) {
+                mouseX = e.pageX;
+                mouseY = e.pageY;
             });
+
+        $(document).ready(function () {
+            $('#calendar').fullCalendar({
+                theme: true,
+                header: {
+                    left: 'prev,next,today',
+                    center: 'title',
+                    right: 'month,agendaWeek,agendaDay'
+                },
+                firstDay: 6,
+                businessHours: {
+                    // days of week. an array of zero-based day of week integers (0=Sunday)
+                    dow: [1, 2, 3, 4, 5], // Monday - Friday
+
+                    start: '08:00', // a start time (8am in this example)
+                    end: '18:00', // an end time (6pm in this example)
+                },
+                defaultView: 'agendaDay',
+                editable: true,
+                allDaySlot: false,
+                selectable: true,
+                eventClick: function (calEvent, jsEvent, view) {
+                    //Kada korisnik klikne na postojeći event
+                    //...
+                    currentEvent = calEvent;
+                    if ($('.add').is(':visible')) {
+                        $('.add').hide('slow');
+                    }
+                    if ($('.edit').is(':visible')) {
+                        $('.edit').hide('slow');
+                    } else {
+                        $('.edit').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                    }
+                },
+
+                dayClick: function (date, jsEvent, view) {
+                    //Kada korisnik klikne na kalendar (gdje nema eventa)
+                    //..
+                    //alert('Kliknut je kalendar!' + date.format('hh:mm'))
+                    //alert('Završava ' + date.add(2, 'hour').format('hh:mm'))
+                    currentDate = date;
+                    if ($('.edit').is(':visible')) {
+                        $('.edit').hide('slow');
+                    }
+                    if ($('.add').is(':visible')) {
+                        $('.add').hide('slow');
+                    } else {
+                        $('.add').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                    }
+                }
+            });
+            //Dodaj sve postojeće evente iz baze u kalendar
+            $('#calendar').fullCalendar('addEventSource', events)
+            $('#calendar').fullCalendar('rerenderEvents')
+        });
     </script>
 </head>
 <body>
-    <h2>Kalendar</h2>
-
+    <!--Ako postoji poruka poslana od akcije nekog kontrolera, ispiši ju.-->
     @if (TempData["message"] != null)
     {
         <div class="alert alert-dismissible alert-success">
@@ -61,7 +152,17 @@
         </div>
     }
 
+    <!--Dropdown meniji koji se generiraju određenom akcijom miša-->
+    <!--z-index stavljen na 10 da se moze obavljati interakcija sa menijem-->
+    <div class="fc-popover add" style="z-index:10;display:none">
+            <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
+    </div>
 
-
+    <div class="fc-popover edit" style="z-index:10;display:none">
+        <ul>
+            <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
+            <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
+        </ul>
+    </div>
     <div id='calendar'></div>
 </body>
