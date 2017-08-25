@@ -15,12 +15,15 @@
         //month varijabla sadrži dvoznamenkastu reprezentaciju mjeseca
         //date varijabla sadrži pravilno formatiran datum za prikaz na kalendar
         var events = [];
+
+        function addEvents() {
             @foreach (var job in Model)
             {
                 string month = job.JobDate.Month < 10 ? "0" + job.JobDate.Month.ToString() : job.JobDate.Month.ToString();
                 var date = job.JobDate.Year + "-" +month + "-" + job.JobDate.Day;
-                @:addEventToList("@job.JobID","@date","@job.StartingHour","@job.EndingHour");
+                @:addEventToList("@job.JobID", "@date", "@job.StartingHour", "@job.EndingHour");
             }
+        }
             function addEventToList(jobID, date, startHour, endHour) {
                 var event = {
                     id: jobID,
@@ -29,8 +32,8 @@
                 };
                 events.push(event);
                 return;
-            }
-
+        }
+            addEvents();
            //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
             var mouseX, mouseY;
             var currentDate;
@@ -135,6 +138,7 @@
             });
             //Dodaj sve postojeće evente iz baze u kalendar
             $('#calendar').fullCalendar('addEventSource', events)
+            $('#calendar').fullCalendar('rerenderEvents')
         });
     </script>
 </head>
@@ -149,6 +153,7 @@
     }
 
     <!--Dropdown meniji koji se generiraju određenom akcijom miša-->
+    <!--z-index stavljen na 10 da se moze obavljati interakcija sa menijem-->
     <div class="fc-popover add" style="z-index:10;display:none">
             <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
     </div>
