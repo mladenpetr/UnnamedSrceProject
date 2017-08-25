@@ -25,7 +25,7 @@ namespace SrceApplicaton.Models
         public System.TimeSpan EndingHour { get; set; }
         public string JobNotes { get; set; }
         public System.DateTime JobDate { get; set; }
-        public byte TemplateID { get; set; }
+        public Nullable<byte> TemplateID { get; set; }
     
         public virtual JobTemplates JobTemplates { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

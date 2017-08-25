@@ -22,31 +22,44 @@ namespace SrceApplicaton.Controllers
             return View();
         }
 
+        public short checkId(List<short> list)
+        {
+            short id = 0;
+            while (true)
+            {
+                if (!list.Contains(id))
+                {
+                    break;
+                }
+                id++;
+            }
+
+            return id;
+        }
+
         // GET: Job/Create
         public ActionResult Create(string start,string end)
         {
-            byte tempID = (byte)db.JobTemplates.Count();
             if (ModelState.IsValid)
             {
+
+                List<short> jobIds = new List<short>(db.Job.Count()); // stvaranje liste sa svim JobId u bazi
+                foreach (Job job in db.Job)
+                {
+                    jobIds.Add(job.JobID);
+                }
+
                 Job newJob = new Job
                 {
-                    JobID = (short)db.Job.Count(),
+                    JobID = checkId(jobIds),
                     StartingHour = TimeSpan.Parse(start.Split('T')[1]),
                     EndingHour = TimeSpan.Parse(end.Split('T')[1]),
                     JobDate = DateTime.Parse(start.Split('T')[0]),
-                    TemplateID = tempID
-                };
-
-                JobTemplates template = new JobTemplates
-                {
-                    TemplateID = tempID,
-                    Wall = false
                 };
                 db.Job.Add(newJob);
-                db.JobTemplates.Add(template);
                 db.SaveChanges();
                 TempData["message"] = "Posao je uspješno dodan!";
-                return RedirectToAction("Index", "Job");
+                return RedirectToAction("Index");
             }
             return View();
         }
@@ -68,7 +81,7 @@ namespace SrceApplicaton.Controllers
         }
 
         // GET: Job/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult Edit(short id)
         {
             return View();
         }
@@ -92,7 +105,22 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Delete/5
         public ActionResult Delete(int id)
         {
-            return View();
+            try
+            {
+                var job = db.Job.Find((short)id);
+                if (job != null)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        db.Job.Remove(job);
+                        db.SaveChanges();
+                    }
+                }
+                return RedirectToAction("Index");
+            } catch
+            {
+                return HttpNotFound("Greška kod brisanja!");
+            }
         }
 
         // POST: Job/Delete/5

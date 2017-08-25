@@ -7,9 +7,9 @@
     <Property Name="JobID" Type="Int16" Nullable="false" />
     <Property Name="StartingHour" Type="Time" Nullable="false" Precision="0" />
     <Property Name="EndingHour" Type="Time" Nullable="false" Precision="0" />
-    <Property Name="JobNotes" Type="String" MaxLength="200" FixedLength="false" Unicode="true" />
+    <Property Name="JobNotes" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="true" />
     <Property Name="JobDate" Type="DateTime" Nullable="false" Precision="0" />
-    <Property Name="TemplateID" Type="Byte" Nullable="false" />
+    <Property Name="TemplateID" Type="Byte" Nullable="true" />
     <NavigationProperty Name="JobTemplates" Relationship="Self.FK_Job_ToTable" FromRole="Job" ToRole="JobTemplates" />
     <NavigationProperty Name="Technician" Relationship="Self.JobTechnician" FromRole="Job" ToRole="Technician" />
   </EntityType>
@@ -48,7 +48,7 @@
     <Property Name="LastMonthSalary" Type="Byte" />
   </EntityType>
   <Association Name="FK_Job_ToTable">
-    <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="1" />
+    <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="0..1" />
     <End Role="Job" Type="Self.Job" Multiplicity="*" />
     <ReferentialConstraint>
       <Principal Role="JobTemplates">
