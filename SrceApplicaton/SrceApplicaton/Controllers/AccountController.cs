@@ -8,6 +8,7 @@ using System.Web;
 using System.Security.Principal;
 using System.Web.Security;
 using System.Collections.Generic;
+using System.Data.Entity;
 
 namespace SrceApplicaton.Controllers
 {
@@ -134,6 +135,19 @@ namespace SrceApplicaton.Controllers
             var currentUser = db.Technician.Find(user.TechnicianID);
             
             return View(currentUser);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit([Bind(Include = "KorisnikID,Ime,Prezime,DatumRod,Email,Spol")] Technician user)
+        {
+            if (ModelState.IsValid)
+            {
+                db.Entry(user).State = EntityState.Modified;
+                db.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            return View(user);
         }
     }
 }
