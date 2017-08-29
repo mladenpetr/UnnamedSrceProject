@@ -7,88 +7,187 @@
 <!--fullcalendar scripts-->
 <head>
     <link rel='stylesheet' href='~/Content/fullcalendar.css' />
+    <link rel='stylesheet' hrel='~/themes/base/jquery-ui.css' />
     <script src='~/Scripts/jquery-3.1.1.min.js'></script>
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
     <script type="text/javascript">
-        //lista poslova koja se puni uzastopnim pozivima funkcije addEventToList
-        //month varijabla sadrži dvoznamenkastu reprezentaciju mjeseca
-        //date varijabla sadrži pravilno formatiran datum za prikaz na kalendar
-        var events = [];
+	
+        //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
+        var mouseX, mouseY;
+        var currentDate;
+        var currentEvent;
 
-        function addEvents() {
-            @foreach (var job in Model)
-            {
-                string month = job.JobDate.Month < 10 ? "0" + job.JobDate.Month.ToString() : job.JobDate.Month.ToString();
-                var date = job.JobDate.Year + "-" +month + "-" + job.JobDate.Day;
-                @:addEventToList("@job.JobID", "@date", "@job.StartingHour", "@job.EndingHour");
+        @{var user = Session["user"] as SrceApplicaton.Models.Technician;}
+ 
+        var user = { TechnicianID:@user.TechnicianID,accessLevel:'@user.AccessLevel'};
+
+
+        function addEvent() {
+            var urltoAction = '@Url.Action("Create", "Job")';
+            var view = $('#calendar').fullCalendar('getView');
+            var viewType;
+            if (view.name == 'month') {
+                viewType = 'month';
+            } else {
+                viewType = 'week';
             }
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'start': currentDate.format(),
+                        'end': currentDate.add(2, 'hour').format(),
+                        'view': viewType
+                    }
+                }).done(function () {
+                    $('.add').hide();
+                    $('#calendar').fullCalendar('refetchEvents');
+                }).fail(function () {
+                    alert('Dogodila se greška!')
+                });
         }
-            function addEventToList(jobID, date, startHour, endHour) {
-                var event = {
-                    id: jobID,
-                    start: date + "T" + startHour,
-                    end: date + "T" + endHour
-                };
-                events.push(event);
-                return;
+
+        function editEvent() {
+            var urltoAction = '@Url.Action("Edit", "Job")';
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'id': currentEvent.id
+                    }
+                }).fail(function () {
+                        alert('Dogodila se greška!')
+                    });
         }
-            addEvents();
-           //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
-            var mouseX, mouseY;
-            var currentDate;
-            var currentEvent;
 
-            function addEvent() {
-                var urltoAction = '@Url.Action("Create", "Job")';
-                    $.ajax({
-                        url: urltoAction,
-                        data: {
-                            'start': currentDate.format(),
-                            'end': currentDate.add(2, 'hour').format()
-                        }
-                    }).done(function () {
-                        $('.add').hide();
-                    }).fail(function () {
-                            alert('Dogodila se greška!')
-                        });
-            }
+        function deleteEvent() {
+            var urltoAction = '@Url.Action("Delete", "Job")';
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'id': currentEvent.id
+                    }
+                }).done(function () {
+                    $('.edit').hide();
+                    $('#calendar').fullCalendar('refetchEvents');
+                }).fail(function () {
+                        alert('Dogodila se greška!')
+                    });
+        }
 
-            function editEvent() {
-                var urltoAction = '@Url.Action("Edit", "Job")';
+        function resizeEvent(revertFunc) {
+            var urltoAction = '@Url.Action("ResizeEvent", "Job")';
+            $.ajax({
+                url: urltoAction,
+                data: {
+                    'id': currentEvent.id,
+                    'end': currentEvent.end.format()
+                }
+            }).fail(function () {
+                alert('Dogodila se greška!');
+                revertFunc(); //Poziv funcije koja vraca event na prošlo stanje
+            });
+        }
+
+        function dropEvent(revertFunc) {
+            var urltoAction = '@Url.Action("DropEvent", "Job")';
+            $.ajax({
+                url: urltoAction,
+                data: {
+                    'id': currentEvent.id,
+                    'start': currentEvent.start.format(),
+                    'end': currentEvent.end.format()
+                }
+            }).fail(function () {
+                alert('Dogodila se greška!');
+                revertFunc(); //Poziv funcije koja vraca event na prošlo stanje
+		});
+		}
+
+            //funkcija koja se poziva pri odabiru prijave posla
+            //Poziva se akcija CheckIn u JobControlleru koja
+            //dodaje posao u korisnikovu listu prijavljenih poslova.
+            function checkIn() {
+                var urltoAction = '@Url.Action("CheckIn", "Job")';
                     $.ajax({
                         url: urltoAction,
                         data: {
                             'id': currentEvent.id
                         }
+                    }).done(function () {
+                        $('.check-in').hide();
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
             }
 
-            function deleteEvent() {
-                var urltoAction = '@Url.Action("Delete", "Job")';
+            //Funkcija koja se poziva pri odabiru odjave posla
+            //Poziva se akcija CheckOut u JobControlleru koja briše
+            //međusobnu poveznicu korisnika i odabranog posla.
+            function checkOut() {
+                var urltoAction = '@Url.Action("CheckOut", "Job")';
                     $.ajax({
                         url: urltoAction,
                         data: {
                             'id': currentEvent.id
                         }
                     }).done(function () {
-                        $('.edit').hide();
+                        $('.check-out').hide();
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
             }
+
+        //funkcija koja prikazuje prikladni meni u ovisnosti o trenutnom stanju posla
+        //Ako je posao već prijavljen od strane tehničara, prikazuje se opcija odjave i obrnuto.
+            function checkJob(calEvent, techEvents) {
+                if (!isJobChecked(calEvent, techEvents)) {
+                    if ($('.check-in').is(':visible')) {
+                        $('.check-in').hide();
+                    } else {
+                        $('.check-in').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                    }
+                } else {
+                    if ($('.check-out').is(':visible')) {
+                        $('.check-out').hide();
+                    } else {
+                        $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                    }
+                }
+            }
+
+        // provjera da li je tehničar već odabrao kliknuti posao
+            function isJobChecked(calEvent, techEvents) {
+                if (techEvents == null) {
+                    return false;
+                }
+                for (i = 0; i < techEvents.length; i++) {
+                    if (techEvents[i] == parseInt(calEvent.id)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+        
 
         //praćenje koordinata miša zbog pozicioniranja menia pri kliku
-            $(document).mousemove(function (e) {
-                mouseX = e.pageX;
-                mouseY = e.pageY;
-            });
+        $(document).mousemove(function (e) {
+            mouseX = e.pageX;
+            mouseY = e.pageY;
+        });
 
+        
         $(document).ready(function () {
             $('#calendar').fullCalendar({
-                theme: true,
+                theme: false,
+                slotLabelFormat: 'H(:mm)',
+                timeFormat: 'H(:mm)', // time format for 24-hour clock
+                prev: 'left-single-arrow',
+                next: 'right-single-arrow',
+                events: {
+                    url: '@Url.Action("GetEvents", "Job")'
+                },
                 header: {
                     left: 'prev,next,today',
                     center: 'title',
@@ -102,43 +201,89 @@
                     start: '08:00', // a start time (8am in this example)
                     end: '18:00', // an end time (6pm in this example)
                 },
-                defaultView: 'agendaDay',
+                defaultView: 'agendaWeek',
                 editable: true,
                 allDaySlot: false,
                 selectable: true,
                 eventClick: function (calEvent, jsEvent, view) {
                     //Kada korisnik klikne na postojeći event
-                    //...
+                    //U ovisnosti u razini pristupa korisnika, prikladne akcije se izvršavaju
+                    //kod pritiska na event.
                     currentEvent = calEvent;
-                    if ($('.add').is(':visible')) {
-                        $('.add').hide('slow');
+                    if (user.accessLevel == 'Employer') {
+                        if ($('.add').is(':visible')) {
+                            $('.add').hide('slow');
+                        }
+                        if ($('.edit').is(':visible')) {
+                            $('.edit').hide('slow');
+                        } else {
+                            $('.edit').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                        }
+                    } else if (user.accessLevel == "Technician") {
+                        var actionURL = '@Url.Action("GetUserEvents", "Job")';
+                        $.ajax({
+                            url: actionURL,
+                            data: {
+                                'id': calEvent.id
+                            },
+                            dataType:'json',
+                            success: function (result) {
+                                checkJob(calEvent, result);
+                            }
+                        }).fail(function () {
+                                alert("Dogodila se greška");
+                            })
                     }
-                    if ($('.edit').is(':visible')) {
-                        $('.edit').hide('slow');
-                    } else {
-                        $('.edit').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                },
+                eventDragStart: function () {
+                    if ($('.fc-popover').is(':visible')) {
+                        $('.fc-popover').hide(100); //Zatvori popover iznad eventa ukoliko započne premiještanje eventa
                     }
+                },
+
+                eventResize: function (event, delta, revertFunc) {
+                    currentEvent = event;
+                    var dateStart = moment(event.start).format('YYYY/MM/DD');
+                    var dateEnd = moment(event.end).format('YYYY/MM/DD');
+
+                     if (dateStart < dateEnd) { //Ako je resize pređe u drugi dan onda vrati event u početno stanje
+                         revertFunc();
+                     } else {
+                        resizeEvent(revertFunc); //Napravi ajax poziv za izmijenu parametara eventa
+                    }
+                },
+
+                eventDrop: function (event, delta, revertFunc) {
+                    currentEvent = event;
+                    dropEvent(revertFunc); //Napravi ajax poziv za izmijenu parametara eventa
                 },
 
                 dayClick: function (date, jsEvent, view) {
                     //Kada korisnik klikne na kalendar (gdje nema eventa)
-                    //..
-                    //alert('Kliknut je kalendar!' + date.format('hh:mm'))
-                    //alert('Završava ' + date.add(2, 'hour').format('hh:mm'))
                     currentDate = date;
-                    if ($('.edit').is(':visible')) {
-                        $('.edit').hide('slow');
-                    }
-                    if ($('.add').is(':visible')) {
-                        $('.add').hide('slow');
-                    } else {
-                        $('.add').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+
+                    //U ovisnosti o razini pristupa usera, prikladne akcije se izvršavaju 
+                    //pri kliku na prazno polje.
+                    if (user.accessLevel == 'Employer') {
+                        if ($('.edit').is(':visible')) {
+                            $('.edit').hide('slow');
+                        }
+                        if ($('.add').is(':visible')) {
+                            $('.add').hide('slow');
+                        } else {
+                            $('.add').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                        }
+                    } else if (user.accessLevel == 'Technician') {
+                        if ($('.check-in').is(':visible')) {
+                            $('.check-in').hide();
+                        }
+                        else if ($('.check-out').is(':visible')) {
+                            $('.check-out').hide();
+                        }
                     }
                 }
             });
-            //Dodaj sve postojeće evente iz baze u kalendar
-            $('#calendar').fullCalendar('addEventSource', events)
-            $('#calendar').fullCalendar('rerenderEvents')
+
         });
     </script>
 </head>
@@ -153,16 +298,32 @@
     }
 
     <!--Dropdown meniji koji se generiraju određenom akcijom miša-->
-    <!--z-index stavljen na 10 da se moze obavljati interakcija sa menijem-->
-    <div class="fc-popover add" style="z-index:10;display:none">
-            <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
-    </div>
 
-    <div class="fc-popover edit" style="z-index:10;display:none">
-        <ul>
-            <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
-            <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
-        </ul>
-    </div>
+    <!--z-index stavljen na 10 da se moze obavljati interakcija sa menijem-->
+    @{
+        if (user.AccessLevel == "Employer")
+        {
+            <div class="fc-popover add" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
+            </div>
+            <div class="fc-popover edit" style="z-index:10;display:none">
+                <ul>
+                    <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
+                    <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
+                </ul>
+            </div>
+        }
+        else if (user.AccessLevel == "Technician")
+        {
+            <div class="fc-popover check-in" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="checkIn()">Prijavi se za Posao</btn>
+            </div>
+            <div class="fc-popover check-out" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="checkOut()">Odjavi posao</btn>
+            </div>
+        }
+    }
+
     <div id='calendar'></div>
 </body>
+
