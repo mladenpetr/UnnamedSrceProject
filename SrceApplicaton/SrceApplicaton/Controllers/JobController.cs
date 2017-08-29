@@ -214,7 +214,8 @@ namespace SrceApplicaton.Controllers
                 id = e.JobID,
                 date = e.JobDate,
                 start = e.StartingHour,
-                end = e.EndingHour
+                end = e.EndingHour,
+                title = e.JobNotes
             }).ToList();
 
             var list = new List<object>();
@@ -225,7 +226,8 @@ namespace SrceApplicaton.Controllers
                 {
                     id = job.id,
                     start = FormData(job.date, job.start),
-                    end = FormData(job.date, job.end)
+                    end = FormData(job.date, job.end),
+                    title = job.title
                 });
             }
 
@@ -242,6 +244,7 @@ namespace SrceApplicaton.Controllers
             var tempDate = date.Year + "-" + month + "-" + day;
 
             return tempDate + "T" + time;
+        }
 
         public ActionResult CheckIn(int id)
         {
