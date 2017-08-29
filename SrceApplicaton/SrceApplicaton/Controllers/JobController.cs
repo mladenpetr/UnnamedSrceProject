@@ -4,12 +4,14 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using SrceApplicaton.Models;
+using System.Data.Entity;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 
 
 namespace SrceApplicaton.Controllers
 {
+    [MyAuthorization]
     public class JobController : Controller
     {
         private SrceAppDatabase1Entities db = new SrceAppDatabase1Entities();
@@ -240,6 +242,50 @@ namespace SrceApplicaton.Controllers
             var tempDate = date.Year + "-" + month + "-" + day;
 
             return tempDate + "T" + time;
+
+        public ActionResult CheckIn(int id)
+        {
+            Technician user = Session["user"] as Technician;
+            Job job = db.Job.Find((short)id);
+            job.JobNotes = user.Name + " " + user.LastName;
+            if (job == null)
+            {
+                new EntryPointNotFoundException();
+            }
+            if (ModelState.IsValid)
+            {
+                db.Technician.Find(user.TechnicianID).Job.Add(job);
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult CheckOut(int id)
+        {
+            Technician user = Session["user"] as Technician;
+            Job job = db.Job.Find((short)id);
+            if (job == null)
+            {
+                new EntryPointNotFoundException();
+            }
+            if (ModelState.IsValid)
+            {
+                db.Technician.Find(user.TechnicianID).Job.Remove(job);
+                db.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        //Metoda koja uzima sve poslove na koje je korisnik prijavljen te ih vraća u
+        //Javascript funkciju koja ju je pozvala.
+        [WebMethod]
+        public string GetUserEvents(int id)
+        {
+            var user = Session["user"] as Technician;
+            var userJobs = db.Technician.Find(user.TechnicianID).Job;
+            JavaScriptSerializer ser = new JavaScriptSerializer();
+            var result = ser.Serialize(userJobs.Select(d => d.JobID).ToList());
+            return result;
         }
     }
 }

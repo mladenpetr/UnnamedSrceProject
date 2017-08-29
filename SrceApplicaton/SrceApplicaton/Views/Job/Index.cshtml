@@ -12,12 +12,16 @@
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
     <script type="text/javascript">
-
-
-           //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
+	
+        //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
         var mouseX, mouseY;
         var currentDate;
         var currentEvent;
+
+        @{var user = Session["user"] as SrceApplicaton.Models.Technician;}
+ 
+        var user = { TechnicianID:@user.TechnicianID,accessLevel:'@user.AccessLevel'};
+
 
         function addEvent() {
             var urltoAction = '@Url.Action("Create", "Job")';
@@ -96,8 +100,76 @@
             }).fail(function () {
                 alert('Dogodila se greška!');
                 revertFunc(); //Poziv funcije koja vraca event na prošlo stanje
-            });
-        }
+		});
+		}
+
+            //funkcija koja se poziva pri odabiru prijave posla
+            //Poziva se akcija CheckIn u JobControlleru koja
+            //dodaje posao u korisnikovu listu prijavljenih poslova.
+            function checkIn() {
+                var urltoAction = '@Url.Action("CheckIn", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'id': currentEvent.id
+                        }
+                    }).done(function () {
+                        $('.check-in').hide();
+                    }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+            }
+
+            //Funkcija koja se poziva pri odabiru odjave posla
+            //Poziva se akcija CheckOut u JobControlleru koja briše
+            //međusobnu poveznicu korisnika i odabranog posla.
+            function checkOut() {
+                var urltoAction = '@Url.Action("CheckOut", "Job")';
+                    $.ajax({
+                        url: urltoAction,
+                        data: {
+                            'id': currentEvent.id
+                        }
+                    }).done(function () {
+                        $('.check-out').hide();
+                    }).fail(function () {
+                            alert('Dogodila se greška!')
+                        });
+            }
+
+        //funkcija koja prikazuje prikladni meni u ovisnosti o trenutnom stanju posla
+        //Ako je posao već prijavljen od strane tehničara, prikazuje se opcija odjave i obrnuto.
+            function checkJob(calEvent, techEvents) {
+                if (!isJobChecked(calEvent, techEvents)) {
+                    if ($('.check-in').is(':visible')) {
+                        $('.check-in').hide();
+                    } else {
+                        $('.check-in').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                    }
+                } else {
+                    if ($('.check-out').is(':visible')) {
+                        $('.check-out').hide();
+                    } else {
+                        $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                    }
+                }
+            }
+
+        // provjera da li je tehničar već odabrao kliknuti posao
+            function isJobChecked(calEvent, techEvents) {
+                if (techEvents == null) {
+                    return false;
+                }
+                for (i = 0; i < techEvents.length; i++) {
+                    if (techEvents[i] == parseInt(calEvent.id)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+
+        
 
         //praćenje koordinata miša zbog pozicioniranja menia pri kliku
         $(document).mousemove(function (e) {
@@ -135,15 +207,32 @@
                 selectable: true,
                 eventClick: function (calEvent, jsEvent, view) {
                     //Kada korisnik klikne na postojeći event
-                    //...
+                    //U ovisnosti u razini pristupa korisnika, prikladne akcije se izvršavaju
+                    //kod pritiska na event.
                     currentEvent = calEvent;
-                    if ($('.add').is(':visible')) {
-                        $('.add').hide('slow');
-                    }
-                    if ($('.edit').is(':visible')) {
-                        $('.edit').hide('slow');
-                    } else {
-                        $('.edit').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                    if (user.accessLevel == 'Employer') {
+                        if ($('.add').is(':visible')) {
+                            $('.add').hide('slow');
+                        }
+                        if ($('.edit').is(':visible')) {
+                            $('.edit').hide('slow');
+                        } else {
+                            $('.edit').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                        }
+                    } else if (user.accessLevel == "Technician") {
+                        var actionURL = '@Url.Action("GetUserEvents", "Job")';
+                        $.ajax({
+                            url: actionURL,
+                            data: {
+                                'id': calEvent.id
+                            },
+                            dataType:'json',
+                            success: function (result) {
+                                checkJob(calEvent, result);
+                            }
+                        }).fail(function () {
+                                alert("Dogodila se greška");
+                            })
                     }
                 },
                 eventDragStart: function () {
@@ -171,17 +260,26 @@
 
                 dayClick: function (date, jsEvent, view) {
                     //Kada korisnik klikne na kalendar (gdje nema eventa)
-                    //..
-                    //alert('Kliknut je kalendar!' + date.format('hh:mm'))
-                    //alert('Završava ' + date.add(2, 'hour').format('hh:mm'))
                     currentDate = date;
-                    if ($('.edit').is(':visible')) {
-                        $('.edit').hide('slow');
-                    }
-                    if ($('.add').is(':visible')) {
-                        $('.add').hide('slow');
-                    } else {
-                        $('.add').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+
+                    //U ovisnosti o razini pristupa usera, prikladne akcije se izvršavaju 
+                    //pri kliku na prazno polje.
+                    if (user.accessLevel == 'Employer') {
+                        if ($('.edit').is(':visible')) {
+                            $('.edit').hide('slow');
+                        }
+                        if ($('.add').is(':visible')) {
+                            $('.add').hide('slow');
+                        } else {
+                            $('.add').css({ 'top': mouseY, 'left': mouseX }).show('fast');
+                        }
+                    } else if (user.accessLevel == 'Technician') {
+                        if ($('.check-in').is(':visible')) {
+                            $('.check-in').hide();
+                        }
+                        else if ($('.check-out').is(':visible')) {
+                            $('.check-out').hide();
+                        }
                     }
                 }
             });
@@ -200,15 +298,32 @@
     }
 
     <!--Dropdown meniji koji se generiraju određenom akcijom miša-->
-    <div class="fc-popover add" style="z-index:10;display:none">
-        <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
-    </div>
 
-    <div class="fc-popover edit" style="z-index:10;display:none">
-        <ul>
-            <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
-            <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
-        </ul>
-    </div>
+    <!--z-index stavljen na 10 da se moze obavljati interakcija sa menijem-->
+    @{
+        if (user.AccessLevel == "Employer")
+        {
+            <div class="fc-popover add" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
+            </div>
+            <div class="fc-popover edit" style="z-index:10;display:none">
+                <ul>
+                    <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
+                    <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
+                </ul>
+            </div>
+        }
+        else if (user.AccessLevel == "Technician")
+        {
+            <div class="fc-popover check-in" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="checkIn()">Prijavi se za Posao</btn>
+            </div>
+            <div class="fc-popover check-out" style="z-index:10;display:none">
+                <btn class="fc-button" onclick="checkOut()">Odjavi posao</btn>
+            </div>
+        }
+    }
+
     <div id='calendar'></div>
 </body>
+
