@@ -8,6 +8,7 @@ using System.Data.Entity;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 
+
 namespace SrceApplicaton.Controllers
 {
     [MyAuthorization]
@@ -29,12 +30,9 @@ namespace SrceApplicaton.Controllers
         public short checkId(List<short> list)
         {
             short id = 0;
-            while (true)
+        
+            while(list.Contains(id))
             {
-                if (!list.Contains(id))
-                {
-                    break;
-                }
                 id++;
             }
 
@@ -42,7 +40,7 @@ namespace SrceApplicaton.Controllers
         }
 
         // GET: Job/Create
-        public ActionResult Create(string start,string end)
+        public ActionResult Create(string start, string end, string view)
         {
             if (ModelState.IsValid)
             {
@@ -53,11 +51,23 @@ namespace SrceApplicaton.Controllers
                     jobIds.Add(job.JobID);
                 }
 
+                TimeSpan startTime;
+                TimeSpan endTime;
+                if (String.Equals(view, "month")){
+                    startTime = new TimeSpan(16, 00, 00);
+                    endTime = new TimeSpan(18, 00, 00);
+                }
+                else
+                {
+                    startTime = TimeSpan.Parse(start.Split('T')[1]);
+                    endTime = TimeSpan.Parse(end.Split('T')[1]);
+                }
+
                 Job newJob = new Job
                 {
                     JobID = checkId(jobIds),
-                    StartingHour = TimeSpan.Parse(start.Split('T')[1]),
-                    EndingHour = TimeSpan.Parse(end.Split('T')[1]),
+                    StartingHour = startTime,
+                    EndingHour = endTime,
                     JobDate = DateTime.Parse(start.Split('T')[0]),
                 };
                 db.Job.Add(newJob);
@@ -142,6 +152,96 @@ namespace SrceApplicaton.Controllers
                 return View();
             }
         }
+
+        // GET: Job/ResizeEvent
+        public ActionResult ResizeEvent(int id, string end)
+        {
+            try
+            {
+                var job = db.Job.Find(id);
+                if (job != null)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        DateTime newDate = DateTime.Parse(end.Split('T')[0]);
+
+                        if (newDate.Equals(job.JobDate))
+                        {
+                            db.Job.Find(id).EndingHour = TimeSpan.Parse(end.Split('T')[1]);
+                            db.SaveChanges();
+                        }
+
+                    }
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Job/DropEvent
+        public ActionResult DropEvent(int id, string start, string end)
+        {
+            try
+            {
+                var job = db.Job.Find(id);
+                if (job != null)
+                {
+                    if (ModelState.IsValid)
+                    {
+                        db.Job.Find(id).StartingHour = TimeSpan.Parse(start.Split('T')[1]);
+                        db.Job.Find(id).EndingHour = TimeSpan.Parse(end.Split('T')[1]);
+                        db.Job.Find(id).JobDate = DateTime.Parse(end.Split('T')[0]);
+                        db.SaveChanges();
+                    }
+                }
+
+                return RedirectToAction("Index");
+            }
+            catch
+            {
+                return View();
+            }
+        }
+
+        // GET: Job/GetEvents
+        public string GetEvents()
+        {
+            var eventList = db.Job.Select(e => new {
+                id = e.JobID,
+                date = e.JobDate,
+                start = e.StartingHour,
+                end = e.EndingHour
+            }).ToList();
+
+            var list = new List<object>();
+
+            foreach (var job in eventList)
+            {
+               list.Add(new
+                {
+                    id = job.id,
+                    start = FormData(job.date, job.start),
+                    end = FormData(job.date, job.end)
+                });
+            }
+
+            JavaScriptSerializer ser = new JavaScriptSerializer();
+
+            return ser.Serialize(list);
+        }
+
+
+        public string FormData(DateTime date, TimeSpan time)
+        {
+            string month = date.Month < 10 ? "0" + date.Month.ToString() : date.Month.ToString();
+            string day = date.Day < 10 ? "0" + date.Day.ToString() : date.Day.ToString();
+            var tempDate = date.Year + "-" + month + "-" + day;
+
+            return tempDate + "T" + time;
 
         public ActionResult CheckIn(int id)
         {
