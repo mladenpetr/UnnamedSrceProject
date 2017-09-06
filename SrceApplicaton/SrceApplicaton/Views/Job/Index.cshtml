@@ -1,4 +1,4 @@
-﻿@model IEnumerable<SrceApplicaton.Models.Job>
+﻿@model SrceApplicaton.Models.JobTemplates
 
 @{
     ViewBag.Title = "Index";
@@ -12,14 +12,14 @@
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
     <script type="text/javascript">
-	
+
         //praćenje trenutne pozicije miša i trenutno kliknutih datuma odnosno evenata.
         var mouseX, mouseY;
         var currentDate;
         var currentEvent;
 
         @{var user = Session["user"] as SrceApplicaton.Models.Technician;}
- 
+
         var user = { TechnicianID:@user.TechnicianID,accessLevel:'@user.AccessLevel'};
 
 
@@ -51,8 +51,12 @@
             var urltoAction = '@Url.Action("Edit", "Job")';
                 $.ajax({
                     url: urltoAction,
+                    type: 'GET',
                     data: {
                         'id': currentEvent.id
+                    },
+                    success: function (data) {
+                        $('body').html(data);
                     }
                 }).fail(function () {
                         alert('Dogodila se greška!')
@@ -115,6 +119,7 @@
                         }
                     }).done(function () {
                         $('.check-in').hide();
+                        $('#calendar').fullCalendar('refetchEvents');
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
@@ -132,9 +137,25 @@
                         }
                     }).done(function () {
                         $('.check-out').hide();
+                        $('#calendar').fullCalendar('refetchEvents');
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
+            }
+
+        //Prikazivanje dosad dodanih templateova za rekonfiguraciju.
+        //Korisnik može odabrati jednu ili stvoriti novu.
+            function showTemplates() {
+                var urltoAction = '@Url.Action("Index", "Template")';
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'id': currentEvent.id
+                    },
+                    success: function (data) {
+                        $('body').html(data)
+                    }
+                })
             }
 
         //funkcija koja prikazuje prikladni meni u ovisnosti o trenutnom stanju posla
@@ -169,7 +190,7 @@
             }
 
 
-        
+
 
         //praćenje koordinata miša zbog pozicioniranja menia pri kliku
         $(document).mousemove(function (e) {
@@ -177,12 +198,12 @@
             mouseY = e.pageY;
         });
 
-        
+
         $(document).ready(function () {
             $('#calendar').fullCalendar({
                 theme: false,
-                slotLabelFormat: 'H(:mm)',
-                timeFormat: 'H(:mm)', // time format for 24-hour clock
+                slotLabelFormat: 'HH:mm',
+                timeFormat: 'HH:mm', // time format for 24-hour clock
                 prev: 'left-single-arrow',
                 next: 'right-single-arrow',
                 events: {
@@ -194,17 +215,12 @@
                     right: 'month,agendaWeek,agendaDay'
                 },
                 firstDay: 6,
-                businessHours: {
-                    // days of week. an array of zero-based day of week integers (0=Sunday)
-                    dow: [1, 2, 3, 4, 5], // Monday - Friday
-
-                    start: '08:00', // a start time (8am in this example)
-                    end: '18:00', // an end time (6pm in this example)
-                },
                 defaultView: 'agendaWeek',
                 editable: true,
                 allDaySlot: false,
                 selectable: true,
+                minTime: "07:00:00",
+                maxTime: "22:00:00",
                 eventClick: function (calEvent, jsEvent, view) {
                     //Kada korisnik klikne na postojeći event
                     //U ovisnosti u razini pristupa korisnika, prikladne akcije se izvršavaju
@@ -262,7 +278,7 @@
                     //Kada korisnik klikne na kalendar (gdje nema eventa)
                     currentDate = date;
 
-                    //U ovisnosti o razini pristupa usera, prikladne akcije se izvršavaju 
+                    //U ovisnosti o razini pristupa usera, prikladne akcije se izvršavaju
                     //pri kliku na prazno polje.
                     if (user.accessLevel == 'Employer') {
                         if ($('.edit').is(':visible')) {
@@ -308,6 +324,7 @@
             </div>
             <div class="fc-popover edit" style="z-index:10;display:none">
                 <ul>
+                    <li><btn class="fc-button" onclick="showTemplates()">Dodaj rekonfiguraciju</btn></li>
                     <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
                     <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
                 </ul>
@@ -325,5 +342,7 @@
     }
 
     <div id='calendar'></div>
+
+
 </body>
 
