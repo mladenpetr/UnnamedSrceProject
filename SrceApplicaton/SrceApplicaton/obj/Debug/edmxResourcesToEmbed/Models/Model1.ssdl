@@ -10,6 +10,10 @@
     <Property Name="JobNotes" Type="nvarchar" MaxLength="200" />
     <Property Name="JobDate" Type="date" Nullable="false" />
     <Property Name="TemplateID" Type="tinyint" />
+    <Property Name="Color" Type="char" MaxLength="10" />
+    <Property Name="Title" Type="nvarchar" MaxLength="50" />
+    <Property Name="JobState" Type="tinyint" />
+    <Property Name="TehnicianNumber" Type="tinyint" />
   </EntityType>
   <EntityType Name="JobTechnician">
     <Key>

@@ -4,6 +4,10 @@
     <EntitySetMapping Name="Job">
       <EntityTypeMapping TypeName="SrceModel.Job">
         <MappingFragment StoreEntitySet="Job">
+          <ScalarProperty Name="TehnicianNumber" ColumnName="TehnicianNumber" />
+          <ScalarProperty Name="JobState" ColumnName="JobState" />
+          <ScalarProperty Name="Title" ColumnName="Title" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
           <ScalarProperty Name="JobID" ColumnName="JobID" />
           <ScalarProperty Name="StartingHour" ColumnName="StartingHour" />
           <ScalarProperty Name="EndingHour" ColumnName="EndingHour" />

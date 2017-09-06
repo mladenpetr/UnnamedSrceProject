@@ -69,6 +69,8 @@ namespace SrceApplicaton.Controllers
                     StartingHour = startTime,
                     EndingHour = endTime,
                     JobDate = DateTime.Parse(start.Split('T')[0]),
+                    JobState = 0,
+                    TehnicianNumber = 2
                 };
                 db.Job.Add(newJob);
                 db.SaveChanges();
@@ -126,6 +128,11 @@ namespace SrceApplicaton.Controllers
                 {
                     if (ModelState.IsValid)
                     {
+                        //Izbaci posao iz liste poslova kod svakog tehnicara koji je prijavljen za taj posao
+                        foreach(Technician tech in db.Job.Find((short)id).Technician)
+                        {
+                            tech.Job.Remove(job);
+                        }
                         db.Job.Remove(job);
                         db.SaveChanges();
                     }
@@ -215,7 +222,9 @@ namespace SrceApplicaton.Controllers
                 date = e.JobDate,
                 start = e.StartingHour,
                 end = e.EndingHour,
-                title = e.JobNotes
+                title = e.Title,
+                color = e.Color,
+                jobNotes = e.JobNotes
             }).ToList();
 
             var list = new List<object>();
@@ -227,13 +236,40 @@ namespace SrceApplicaton.Controllers
                     id = job.id,
                     start = FormData(job.date, job.start),
                     end = FormData(job.date, job.end),
-                    title = job.title
+                    title = job.title,
+                    color = job.color,
+                    notes = job.jobNotes
                 });
             }
 
             JavaScriptSerializer ser = new JavaScriptSerializer();
 
             return ser.Serialize(list);
+        }
+
+        // GET: Job/GetEvents
+        public string GetUsers()
+        {
+            var eventList = db.Job.Select(e => new {
+                id = e.JobID,
+                date = e.JobDate,
+                start = e.StartingHour,
+                end = e.EndingHour,
+                title = e.Title,
+                color = e.Color,
+                jobNotes = e.JobNotes
+            }).ToList();
+            var usersList = db.Technician.Select(e => new
+            {
+                name = e.Name,
+                lastName = e.LastName,
+                hours = e.WorkHours,
+                level = e.AccessLevel
+            }).ToList();
+
+            JavaScriptSerializer ser = new JavaScriptSerializer();
+
+            return ser.Serialize(usersList);
         }
 
 
@@ -250,7 +286,20 @@ namespace SrceApplicaton.Controllers
         {
             Technician user = Session["user"] as Technician;
             Job job = db.Job.Find((short)id);
-            job.JobNotes = user.Name + " " + user.LastName;
+
+            string newNotes = "rekoniguracija 50stolova, pozvat odrzavanje ak treba pomoc";
+            job.JobNotes = newNotes;
+            if (job.Title == null)
+            {
+                job.Title = user.Name + " " + user.LastName;
+                job.Color = user.Color;
+            }
+            else
+            {
+                job.Title += user.Name + " " + user.LastName + ", ";
+                job.Color = "#9f00ff";
+            }
+            
             if (job == null)
             {
                 new EntryPointNotFoundException();
@@ -267,10 +316,14 @@ namespace SrceApplicaton.Controllers
         {
             Technician user = Session["user"] as Technician;
             Job job = db.Job.Find((short)id);
+            job.Color = null;
+            job.Title = null;
+            job.JobNotes = null;
             if (job == null)
             {
                 new EntryPointNotFoundException();
             }
+            
             if (ModelState.IsValid)
             {
                 db.Technician.Find(user.TechnicianID).Job.Remove(job);

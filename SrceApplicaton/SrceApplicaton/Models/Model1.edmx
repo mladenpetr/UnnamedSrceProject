@@ -15,6 +15,10 @@
           <Property Name="JobNotes" Type="nvarchar" MaxLength="200" />
           <Property Name="JobDate" Type="date" Nullable="false" />
           <Property Name="TemplateID" Type="tinyint" />
+          <Property Name="Color" Type="char" MaxLength="10" />
+          <Property Name="Title" Type="nvarchar" MaxLength="50" />
+          <Property Name="JobState" Type="tinyint" />
+          <Property Name="TehnicianNumber" Type="tinyint" />
         </EntityType>
         <EntityType Name="JobTechnician">
           <Key>
@@ -126,6 +130,10 @@
           <Property Name="TemplateID" Type="Byte" Nullable="true" />
           <NavigationProperty Name="JobTemplates" Relationship="Self.FK_Job_ToTable" FromRole="Job" ToRole="JobTemplates" />
           <NavigationProperty Name="Technician" Relationship="Self.JobTechnician" FromRole="Job" ToRole="Technician" />
+          <Property Name="Color" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+          <Property Name="Title" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="JobState" Type="Byte" />
+          <Property Name="TehnicianNumber" Type="Byte" />
         </EntityType>
         <EntityType Name="JobTemplates">
           <Key>
@@ -199,6 +207,10 @@
           <EntitySetMapping Name="Job">
             <EntityTypeMapping TypeName="SrceModel.Job">
               <MappingFragment StoreEntitySet="Job">
+                <ScalarProperty Name="TehnicianNumber" ColumnName="TehnicianNumber" />
+                <ScalarProperty Name="JobState" ColumnName="JobState" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="Color" ColumnName="Color" />
                 <ScalarProperty Name="JobID" ColumnName="JobID" />
                 <ScalarProperty Name="StartingHour" ColumnName="StartingHour" />
                 <ScalarProperty Name="EndingHour" ColumnName="EndingHour" />
