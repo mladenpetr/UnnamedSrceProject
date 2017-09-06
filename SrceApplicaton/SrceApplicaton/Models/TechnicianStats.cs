@@ -14,19 +14,10 @@ namespace SrceApplicaton.Models
     
     public partial class TechnicianStats
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public TechnicianStats()
-        {
-            this.Technician = new HashSet<Technician>();
-        }
-    
         public short StatsID { get; set; }
         public Nullable<short> WorkHours { get; set; }
         public Nullable<short> ThisMonthSalary { get; set; }
         public Nullable<short> ThisYearSalary { get; set; }
         public Nullable<short> LastMonthSalary { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Technician> Technician { get; set; }
     }
 }

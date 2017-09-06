@@ -27,6 +27,7 @@ namespace SrceApplicaton.Models
         public string TablesLayout { get; set; }
         public string ExtraNotes { get; set; }
         public bool Wall { get; set; }
+        public string Hall { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Job> Job { get; set; }

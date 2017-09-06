@@ -12,6 +12,8 @@
     <Property Name="TemplateID" Type="Byte" Nullable="true" />
     <NavigationProperty Name="JobTemplates" Relationship="Self.FK_Job_ToTable" FromRole="Job" ToRole="JobTemplates" />
     <NavigationProperty Name="Technician" Relationship="Self.JobTechnician" FromRole="Job" ToRole="Technician" />
+    <Property Name="Color" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
+    <Property Name="Title" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
   </EntityType>
   <EntityType Name="JobTemplates">
     <Key>
@@ -25,6 +27,7 @@
     <Property Name="ExtraNotes" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
     <Property Name="Wall" Type="Boolean" Nullable="false" />
     <NavigationProperty Name="Job" Relationship="Self.FK_Job_ToTable" FromRole="JobTemplates" ToRole="Job" />
+    <Property Name="Hall" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
   </EntityType>
   <EntityType Name="Technician">
     <Key>
@@ -75,5 +78,16 @@
       <End Role="Job" EntitySet="Job" />
       <End Role="Technician" EntitySet="Technician" />
     </AssociationSet>
+    <EntitySet Name="TechnicianStats" EntityType="SrceModel.TechnicianStats" />
   </EntityContainer>
+  <EntityType Name="TechnicianStats">
+    <Key>
+      <PropertyRef Name="StatsID" />
+    </Key>
+    <Property Name="StatsID" Type="Int16" Nullable="false" />
+    <Property Name="WorkHours" Type="Int16" />
+    <Property Name="ThisMonthSalary" Type="Int16" />
+    <Property Name="ThisYearSalary" Type="Int16" />
+    <Property Name="LastMonthSalary" Type="Int16" />
+  </EntityType>
 </Schema>

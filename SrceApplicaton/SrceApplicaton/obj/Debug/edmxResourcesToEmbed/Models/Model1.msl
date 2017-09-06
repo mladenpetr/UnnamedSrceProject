@@ -4,6 +4,8 @@
     <EntitySetMapping Name="Job">
       <EntityTypeMapping TypeName="SrceModel.Job">
         <MappingFragment StoreEntitySet="Job">
+          <ScalarProperty Name="Title" ColumnName="Title" />
+          <ScalarProperty Name="Color" ColumnName="Color" />
           <ScalarProperty Name="JobID" ColumnName="JobID" />
           <ScalarProperty Name="StartingHour" ColumnName="StartingHour" />
           <ScalarProperty Name="EndingHour" ColumnName="EndingHour" />
@@ -16,6 +18,7 @@
     <EntitySetMapping Name="JobTemplates">
       <EntityTypeMapping TypeName="SrceModel.JobTemplates">
         <MappingFragment StoreEntitySet="JobTemplates">
+          <ScalarProperty Name="Hall" ColumnName="Hall" />
           <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
           <ScalarProperty Name="Chairs" ColumnName="Chairs" />
           <ScalarProperty Name="ChairLayout" ColumnName="ChairLayout" />
@@ -55,5 +58,16 @@
         <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
       </EndProperty>
     </AssociationSetMapping>
+    <EntitySetMapping Name="TechnicianStats">
+      <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
+        <MappingFragment StoreEntitySet="TechnicianStats">
+          <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+          <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+          <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+          <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
+          <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+        </MappingFragment>
+      </EntityTypeMapping>
+    </EntitySetMapping>
   </EntityContainerMapping>
 </Mapping>

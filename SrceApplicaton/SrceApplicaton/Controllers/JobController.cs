@@ -18,7 +18,7 @@ namespace SrceApplicaton.Controllers
         // GET: Job
         public ActionResult Index()
         {
-            return View(db.Job.ToList());
+            return View();
         }
 
         // GET: Job/Details/5
@@ -73,7 +73,7 @@ namespace SrceApplicaton.Controllers
                 db.Job.Add(newJob);
                 db.SaveChanges();
                 TempData["message"] = "Posao je uspješno dodan!";
-                return RedirectToAction("Index");
+                return View("Index");
             }
             return View();
         }
@@ -97,7 +97,7 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Edit/5
         public ActionResult Edit(short id)
         {
-            return View();
+            return View(db.Job.Find(id));
         }
 
         // POST: Job/Edit/5
@@ -249,12 +249,12 @@ namespace SrceApplicaton.Controllers
         public ActionResult CheckIn(int id)
         {
             Technician user = Session["user"] as Technician;
-            Job job = db.Job.Find((short)id);
-            job.JobNotes = user.Name + " " + user.LastName;
+            Job job = db.Job.Find((short)id); 
             if (job == null)
             {
                 new EntryPointNotFoundException();
             }
+            job.JobNotes += user.Name + " " + user.LastName + "\n";
             if (ModelState.IsValid)
             {
                 db.Technician.Find(user.TechnicianID).Job.Add(job);
@@ -271,6 +271,16 @@ namespace SrceApplicaton.Controllers
             {
                 new EntryPointNotFoundException();
             }
+            string[] notes = job.JobNotes.Split('\n');
+            string newNotes = null;
+            foreach (string note in notes)
+            {
+                if (note != user.Name + " " + user.LastName)
+                {
+                    newNotes += note;
+                }
+            }
+            job.JobNotes = newNotes;
             if (ModelState.IsValid)
             {
                 db.Technician.Find(user.TechnicianID).Job.Remove(job);

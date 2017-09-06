@@ -10,6 +10,8 @@
     <Property Name="JobNotes" Type="nvarchar" MaxLength="200" />
     <Property Name="JobDate" Type="date" Nullable="false" />
     <Property Name="TemplateID" Type="tinyint" />
+    <Property Name="Color" Type="char" MaxLength="10" />
+    <Property Name="Title" Type="nvarchar" MaxLength="50" />
   </EntityType>
   <EntityType Name="JobTechnician">
     <Key>
@@ -30,6 +32,7 @@
     <Property Name="TablesLayout" Type="nvarchar" MaxLength="20" />
     <Property Name="ExtraNotes" Type="nvarchar" MaxLength="50" />
     <Property Name="Wall" Type="bit" Nullable="false" />
+    <Property Name="Hall" Type="char" MaxLength="2" />
   </EntityType>
   <EntityType Name="Technician">
     <Key>
@@ -50,6 +53,16 @@
     <Property Name="ThisMonthSalary" Type="tinyint" />
     <Property Name="ThisYearSalary" Type="tinyint" />
     <Property Name="LastMonthSalary" Type="tinyint" />
+  </EntityType>
+  <EntityType Name="TechnicianStats">
+    <Key>
+      <PropertyRef Name="StatsID" />
+    </Key>
+    <Property Name="StatsID" Type="smallint" Nullable="false" />
+    <Property Name="WorkHours" Type="smallint" />
+    <Property Name="ThisMonthSalary" Type="smallint" />
+    <Property Name="ThisYearSalary" Type="smallint" />
+    <Property Name="LastMonthSalary" Type="smallint" />
   </EntityType>
   <Association Name="FK_Job_ToTable">
     <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="0..1" />
@@ -92,6 +105,7 @@
     <EntitySet Name="JobTechnician" EntityType="Self.JobTechnician" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" Schema="dbo" store:Type="Tables" />
     <EntitySet Name="Technician" EntityType="Self.Technician" Schema="dbo" store:Type="Tables" />
+    <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" Schema="dbo" store:Type="Tables" />
     <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
       <End Role="JobTemplates" EntitySet="JobTemplates" />
       <End Role="Job" EntitySet="Job" />
