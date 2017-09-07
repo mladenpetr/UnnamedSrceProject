@@ -39,6 +39,7 @@
           <Property Name="TablesLayout" Type="nvarchar" MaxLength="20" />
           <Property Name="ExtraNotes" Type="nvarchar" MaxLength="50" />
           <Property Name="Wall" Type="bit" Nullable="false" />
+          <Property Name="Hall" Type="char" MaxLength="2" />
         </EntityType>
         <EntityType Name="Technician">
           <Key>
@@ -59,6 +60,16 @@
           <Property Name="ThisMonthSalary" Type="tinyint" />
           <Property Name="ThisYearSalary" Type="tinyint" />
           <Property Name="LastMonthSalary" Type="tinyint" />
+        </EntityType>
+        <EntityType Name="TechnicianStats">
+          <Key>
+            <PropertyRef Name="StatsID" />
+          </Key>
+          <Property Name="StatsID" Type="smallint" Nullable="false" />
+          <Property Name="WorkHours" Type="smallint" />
+          <Property Name="ThisMonthSalary" Type="smallint" />
+          <Property Name="ThisYearSalary" Type="smallint" />
+          <Property Name="LastMonthSalary" Type="smallint" />
         </EntityType>
         <Association Name="FK_Job_ToTable">
           <End Role="JobTemplates" Type="Self.JobTemplates" Multiplicity="0..1" />
@@ -101,6 +112,7 @@
           <EntitySet Name="JobTechnician" EntityType="Self.JobTechnician" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="JobTemplates" EntityType="Self.JobTemplates" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Technician" EntityType="Self.Technician" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="TechnicianStats" EntityType="Self.TechnicianStats" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_Job_ToTable" Association="Self.FK_Job_ToTable">
             <End Role="JobTemplates" EntitySet="JobTemplates" />
             <End Role="Job" EntitySet="Job" />
@@ -147,6 +159,7 @@
           <Property Name="ExtraNotes" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Wall" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Job" Relationship="Self.FK_Job_ToTable" FromRole="JobTemplates" ToRole="Job" />
+          <Property Name="Hall" Type="String" MaxLength="2" FixedLength="true" Unicode="false" />
         </EntityType>
         <EntityType Name="Technician">
           <Key>
@@ -197,7 +210,18 @@
             <End Role="Job" EntitySet="Job" />
             <End Role="Technician" EntitySet="Technician" />
           </AssociationSet>
+          <EntitySet Name="TechnicianStats" EntityType="SrceModel.TechnicianStats" />
         </EntityContainer>
+        <EntityType Name="TechnicianStats">
+          <Key>
+            <PropertyRef Name="StatsID" />
+          </Key>
+          <Property Name="StatsID" Type="Int16" Nullable="false" />
+          <Property Name="WorkHours" Type="Int16" />
+          <Property Name="ThisMonthSalary" Type="Int16" />
+          <Property Name="ThisYearSalary" Type="Int16" />
+          <Property Name="LastMonthSalary" Type="Int16" />
+        </EntityType>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -223,6 +247,7 @@
           <EntitySetMapping Name="JobTemplates">
             <EntityTypeMapping TypeName="SrceModel.JobTemplates">
               <MappingFragment StoreEntitySet="JobTemplates">
+                <ScalarProperty Name="Hall" ColumnName="Hall" />
                 <ScalarProperty Name="TemplateID" ColumnName="TemplateID" />
                 <ScalarProperty Name="Chairs" ColumnName="Chairs" />
                 <ScalarProperty Name="ChairLayout" ColumnName="ChairLayout" />
@@ -262,6 +287,17 @@
               <ScalarProperty Name="TechnicianID" ColumnName="TechnicianID" />
             </EndProperty>
           </AssociationSetMapping>
+          <EntitySetMapping Name="TechnicianStats">
+            <EntityTypeMapping TypeName="SrceModel.TechnicianStats">
+              <MappingFragment StoreEntitySet="TechnicianStats">
+                <ScalarProperty Name="LastMonthSalary" ColumnName="LastMonthSalary" />
+                <ScalarProperty Name="ThisYearSalary" ColumnName="ThisYearSalary" />
+                <ScalarProperty Name="ThisMonthSalary" ColumnName="ThisMonthSalary" />
+                <ScalarProperty Name="WorkHours" ColumnName="WorkHours" />
+                <ScalarProperty Name="StatsID" ColumnName="StatsID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
         </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>

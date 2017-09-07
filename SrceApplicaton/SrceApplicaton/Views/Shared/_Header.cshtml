@@ -9,8 +9,8 @@
     @* END Logo *@
     @* BEGIN Header *@
     <nav class="navbar navbar-static-top" role="navigation">
-       @if (Session["user"] != null)
-       {
+@if (Session["user"] != null)
+{
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
             <span class="sr-only">Toggle navigation</span>
         </a>
@@ -98,7 +98,8 @@
                 </li>
                 @* END Tasks *@
                 @* BEGIN User Account Menu *@
-               
+                @if (Session["user"] != null)
+                {
                     <li class="dropdown user user-menu">
                         @{var user = Session["user"] as SrceApplicaton.Models.Technician;}
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -134,7 +135,7 @@
                             </li>
                         </ul>
                     </li>
-                            
+                            }
                             @* END User Account Menu *@
                             @* BEGIN Control Sidebar Toggle Button *@
                             <li>

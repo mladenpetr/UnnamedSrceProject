@@ -1,37 +1,9 @@
 ﻿@using WebHelpers.Mvc5
 
-<script type="text/javascript" src="https://canvasjs.com/assets/script/jquery-1.11.1.min.js"></script>
-<script type="text/javascript" src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+
 <script type="text/javascript">
 
-    var dataPie = [];
-    var chart;
-    window.onload = function () {
-       chart = new CanvasJS.Chart("statistika", {
-            title: {
-                text: "Statistika",
-                fontSize: 10
-            },
-            axisY: {
-                title: "Broj sati u mjesecu"
-            },
-            data: [
-                {
-                    type: "pie",
-                    showInLegend: true,
-                    toolTipContent: "{label} <br/> {y} %",
-                    indexLabel: "{y} %",
-                    dataPoints: [{ dataPoints: dataPie }]
-                }
-            ]
-        });
-    }
-
-    function updateChart(element)
-    {
-        dataPie.push({ label: element.name, y: element.hours, legendText: element.name })
-
-    }
+   
      function fetchUsers() {
             var urltoAction = '@Url.Action("GetUsers", "Job")';
             $.ajax({
@@ -46,17 +18,14 @@
                     if ($ulSub.length != 0) {
                         $ulSub.empty();
                         $("#statistika").empty();
-                        dataPie.length = 0;
                     }
                     $.each(data, function (index, element) {
                         if (element.level == "Technician") {
                         $tehnician = '<li style="color: white">' + element.name + " " + element.lastName + " : " + element.hours + "h</li>";
                         $ulSub.append($tehnician);
-                        updateChart(element);
                         }
 
                     });
-                    chart.render();
                 }
             }).fail(function () {
                 alert('Dogodila se greška!')
@@ -98,8 +67,6 @@
                         </span>
                     </a>
                     <ul class="treeview-menu"></ul>
-                    <div id="statistika" style="height: 300px; width: 100%;">
-                    </div>
                 </li>
             </ul>
         }
