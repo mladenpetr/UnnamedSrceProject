@@ -9,6 +9,8 @@
     @* END Logo *@
     @* BEGIN Header *@
     <nav class="navbar navbar-static-top" role="navigation">
+@if (Session["user"] != null)
+{
         <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
             <span class="sr-only">Toggle navigation</span>
         </a>
@@ -121,7 +123,7 @@
                             </li>
                             <li class="user-footer">
                                 <div class="pull-left">
-                                    @Html.ActionLink("Postavke","AccountDetails","Account", null, new { @class = "btn btn-default btn-flat" })
+                                    @Html.ActionLink("Postavke", "AccountDetails", "Account", null, new { @class = "btn btn-default btn-flat" })
                                 </div>
                                 <div class="pull-right">
                                     @using (Html.BeginForm("Logoff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "btn btn-default btn-flat" }))
@@ -142,5 +144,6 @@
                             @* END Control Sidebar Toggle Button *@
                         </ul>
                     </div>
+                            }
                 </nav>
             </header>

@@ -1,4 +1,39 @@
 ﻿@using WebHelpers.Mvc5
+
+
+<script type="text/javascript">
+
+   
+     function fetchUsers() {
+            var urltoAction = '@Url.Action("GetUsers", "Job")';
+            $.ajax({
+                type: 'GET',
+                url: urltoAction,
+                data: {
+                    users: 'value'
+                },
+                dataType: 'json',
+                success: function (data) {
+                    $ulSub = $(".treeview-menu");
+                    if ($ulSub.length != 0) {
+                        $ulSub.empty();
+                        $("#statistika").empty();
+                    }
+                    $.each(data, function (index, element) {
+                        if (element.level == "Technician") {
+                        $tehnician = '<li style="color: white">' + element.name + " " + element.lastName + " : " + element.hours + "h</li>";
+                        $ulSub.append($tehnician);
+                        }
+
+                    });
+                }
+            }).fail(function () {
+                alert('Dogodila se greška!')
+            });
+        }
+</script>
+
+
 <aside class="main-sidebar">
     <section class="sidebar">
         @* BEGIN Search *@
@@ -14,27 +49,27 @@
         </form>
         @* END Search *@
         @* BEGIN Menu *@
-        <ul class="sidebar-menu">
-            <li class="header">HEADER</li>
-            <li class="@Url.IsLinkActive("Index", "Home")">
-                <a href="@Url.Action("Index", "Home")"><i class="fa fa-link"></i> <span>Home</span></a>
-            </li>
-            <li class="@Url.IsLinkActive("AnotherLink", "Home")">
-                <a href="@Url.Action("AnotherLink", "Home")"><i class="fa fa-link"></i> <span>Another Link</span></a>
-            </li>
-            <li class="treeview">
-                <a href="#">
-                    <i class="fa fa-link"></i> <span>Multilevel</span>
-                    <span class="pull-right-container">
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </span>
-                </a>
-                <ul class="treeview-menu">
-                    <li><a href="#">Link in level 2</a></li>
-                    <li><a href="#">Link in level 2</a></li>
-                </ul>
-            </li>
-        </ul>
+        @if (Session["user"] != null)
+        {
+            <ul class="sidebar-menu">
+                <li class="header">HEADER</li>
+                <li class="@Url.IsLinkActive("Index", "Home")">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-link"></i> <span>Home</span></a>
+                </li>
+                <li class="@Url.IsLinkActive("AnotherLink", "Home")">
+                    <a href="@Url.Action("AnotherLink", "Home")"><i class="fa fa-link"></i> <span>Another Link</span></a>
+                </li>
+                <li class="treeview">
+                    <a href="#">
+                        <i class="fa fa-link"></i> <span onclick="fetchUsers()">Tehničari</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu"></ul>
+                </li>
+            </ul>
+        }
         @* END Menu *@
     </section>
 </aside>
