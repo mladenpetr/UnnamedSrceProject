@@ -52,6 +52,9 @@ TestResults/
 ######################
 *.log
 *.sqlite
+# SQL Server files
+*.mdf
+*.ldf
 # OS generated files #
 ######################
 .DS_Store?
@@ -73,3 +76,5 @@ _[Ss]cripts
 *.nupkg
 *.ncrunchsolution
 *.dot[Cc]over
+# Visual Studio 2017 cache/options directory
+.vs/
