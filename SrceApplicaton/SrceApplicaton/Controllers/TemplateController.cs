@@ -64,7 +64,7 @@ namespace SrceApplicaton.Controllers
                     TablesLayout = model.view.TablesLayout,
                     Hall = model.view.Hall,
                     ExtraNotes = model.view.ExtraNotes,
-                    Wall = model.view.Wall,
+                    Wall = model.view.Wall
                 };
                 db.JobTemplates.Add(newTemplate);
                 db.Job.Find(jobID).TemplateID = model.view.templateID;

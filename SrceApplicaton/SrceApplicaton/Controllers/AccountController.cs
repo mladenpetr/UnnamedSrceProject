@@ -9,6 +9,9 @@ using System.Security.Principal;
 using System.Web.Security;
 using System.Collections.Generic;
 using System.Data.Entity;
+using System.Security.Policy;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SrceApplicaton.Controllers
 {
@@ -45,6 +48,8 @@ namespace SrceApplicaton.Controllers
                 {
                     techIds.Add(tech.TechnicianID);
                 }
+                byte[] hashedPassword = GetHashedPassword(model.Password, model.Username);
+                string storedPassword = Convert.ToBase64String(hashedPassword);
                 Technician newUser = new Technician
                 {
                     TechnicianID = new JobController().checkId(techIds),
@@ -56,7 +61,7 @@ namespace SrceApplicaton.Controllers
                     Color = model.Color,
                     email = model.email,
                     Username = model.Username,
-                    Password = model.Password,
+                    Password = storedPassword,
                     AccessLevel = "Technician",
                     WorkHours = 0,
                     ThisMonthSalary = 0,
@@ -71,6 +76,20 @@ namespace SrceApplicaton.Controllers
             }
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private byte[] GetHashedPassword(string password, string username)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(username);
+            while (sb.Length < 8)
+            {
+                sb.Append(username.Last());
+            }
+            byte[] salt = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 1000);
+            return pbkdf2.GetBytes(15);
+
         }
 
         //
@@ -109,8 +128,9 @@ namespace SrceApplicaton.Controllers
 
         private Technician AttemptLogIn(string username, string password)
         {
+            var hashedPassword = Convert.ToBase64String(GetHashedPassword(password, username));
             var user = db.Technician.Where(u => u.Username == username && 
-                u.Password == password).FirstOrDefault();
+                u.Password == hashedPassword).FirstOrDefault();
             return user;
         }
 
@@ -139,13 +159,19 @@ namespace SrceApplicaton.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "KorisnikID,Ime,Prezime,DatumRod,Email,Spol")] Technician user)
+        public ActionResult Edit(Technician user)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(user).State = EntityState.Modified;
+                var usr = db.Technician.Find(user.TechnicianID);
+                usr.Name = user.Name;
+                usr.LastName = user.LastName;
+                usr.PhoneNumber = user.PhoneNumber;
+                usr.DateOfBirth = user.DateOfBirth;
+                usr.email = user.email;
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                TempData["message"] = "Uspješno ste promijenili osobne podatke!";
+                return View(db.Technician.Find(user.TechnicianID));
             }
             return View(user);
         }

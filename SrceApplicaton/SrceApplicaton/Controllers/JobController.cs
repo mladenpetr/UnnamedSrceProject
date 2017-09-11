@@ -104,18 +104,31 @@ namespace SrceApplicaton.Controllers
 
         // POST: Job/Edit/5
         [HttpPost]
-        public ActionResult Edit(int id, FormCollection collection)
+        public ActionResult Edit(Job job)
         {
-            try
+            if (ModelState.IsValid)
             {
-                // TODO: Add update logic here
-
-                return RedirectToAction("Index");
+                var jb = db.Job.Find(job.JobID);
+                jb.Title = job.Title;
+                jb.StartingHour = job.StartingHour;
+                jb.EndingHour = job.EndingHour;
+                jb.JobNotes = job.JobNotes;
+                jb.JobDate = job.JobDate;
+                if (job.JobTemplates != null)
+                {
+                    jb.JobTemplates.Hall = job.JobTemplates.Hall;
+                    jb.JobTemplates.Chairs = job.JobTemplates.Chairs;
+                    jb.JobTemplates.ChairLayout = job.JobTemplates.ChairLayout;
+                    jb.JobTemplates.Tables = job.JobTemplates.Tables;
+                    jb.JobTemplates.TablesLayout = job.JobTemplates.TablesLayout;
+                    jb.JobTemplates.ExtraNotes = job.JobTemplates.ExtraNotes;
+                    jb.JobTemplates.Wall = job.JobTemplates.Wall;
+                }
+                db.SaveChanges();
+                TempData["message"] = "Uspješno ste promijenili podatke o poslu!";
+                return View(db.Job.Find(job.JobID));
             }
-            catch
-            {
-                return View();
-            }
+            return View(job);
         }
 
         // GET: Job/Delete/5
