@@ -10,6 +10,7 @@
         <EntityTypeShape EntityType="SrceModel.Technician" Width="1.5" PointX="5.25" PointY="1" IsExpanded="true" />
         <AssociationConnector Association="SrceModel.FK_Job_ToTable" ManuallyRouted="false" />
         <AssociationConnector Association="SrceModel.JobTechnician" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="SrceModel.TechnicianStats" Width="1.5" PointX="0.75" PointY="5.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

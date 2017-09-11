@@ -1,0 +1,137 @@
+﻿@model SrceApplicaton.Models.ComplexTemplateModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<script>
+    function addTemplate() {
+        $('#event-modal').modal('show');
+    }
+</script>
+
+
+
+<p>
+    <button onclick="addTemplate()" class="btn-google">Nova rekonfiguracija</button>
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.view.Chairs)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.ChairLayout)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.Tables)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.TablesLayout)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.ExtraNotes)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.Wall)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.view.Hall)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.viewList) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Chairs)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ChairLayout)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Tables)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.TablesLayout)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.ExtraNotes)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Wall)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Hall)
+        </td>
+        <td>
+            @Html.ActionLink("Dodaj rekonfiguraciju", "Add", new { templateID=item.templateID , jobID=item.jobID}) |
+            @Html.ActionLink("Uredi rekonfiguraciju", "Edit", new { templateID=item.templateID }) |
+            @Html.ActionLink("Izbriši rekonfiguraciju", "Delete", new { templateID=item.templateID, jobID = item.jobID })
+        </td>
+    </tr>
+}
+
+</table>
+
+    <!--Forma koja se pojavljuje pri odabiru opcije dodavanja nove rekonfiguracije-->
+@using (Html.BeginForm("Create", "Template", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="jobID" id="job" value=@Model.jobID />
+    <div class="modal fade" id="event-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title">Rekonfiguracija</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.Hall)
+                        @Html.DropDownListFor(m => m.view.Hall, new List<SelectListItem>() {
+                            new SelectListItem{Value = "e" , Text = "Dvorana E"},
+                            new SelectListItem{Value = "e1" , Text = "Dvorana E1"},
+                            new SelectListItem{Value = "e2" , Text = "Dvorana E2"}
+                       }, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.Chairs)
+                        @Html.EditorFor(m => m.view.Chairs, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                        @Html.ValidationMessageFor(m => m.view.Chairs, "", new { htmlAttributes = new { @class = "text-danger" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.ChairLayout)
+                        @Html.EditorFor(m => m.view.ChairLayout, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.Tables)
+                        @Html.EditorFor(m => m.view.Tables, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.TablesLayout)
+                        @Html.EditorFor(m => m.view.TablesLayout, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.Wall)
+                        @Html.DropDownListFor(m => m.view.Wall, new List<SelectListItem>() {
+                            new SelectListItem{Value = "true" , Text = "Da"},
+                            new SelectListItem{Value = "false" , Text = "Ne"}
+                       }, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                    <div class="form-group">
+                        @Html.LabelFor(m => m.view.ExtraNotes)
+                        @Html.EditorFor(m => m.view.ExtraNotes, new { htmlAttributes = new { @class = "form-control col-xs-3" } })
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+}
+

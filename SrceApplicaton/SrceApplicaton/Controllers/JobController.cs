@@ -18,7 +18,7 @@ namespace SrceApplicaton.Controllers
         // GET: Job
         public ActionResult Index()
         {
-            return View(db.Job.ToList());
+            return View();
         }
 
         // GET: Job/Details/5
@@ -70,12 +70,12 @@ namespace SrceApplicaton.Controllers
                     EndingHour = endTime,
                     JobDate = DateTime.Parse(start.Split('T')[0]),
                     JobState = 0,
-                    TehnicianNumber = 2
+                    TechnicianNumber = 2
                 };
                 db.Job.Add(newJob);
                 db.SaveChanges();
                 TempData["message"] = "Posao je uspješno dodan!";
-                return RedirectToAction("Index");
+                return View("Index");
             }
             return View();
         }
@@ -99,7 +99,7 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Edit/5
         public ActionResult Edit(short id)
         {
-            return View();
+            return View(db.Job.Find(id));
         }
 
         // POST: Job/Edit/5
@@ -126,9 +126,10 @@ namespace SrceApplicaton.Controllers
                 var job = db.Job.Find((short)id);
                 if (job != null)
                 {
+					
                     if (ModelState.IsValid)
                     {
-                        //Izbaci posao iz liste poslova kod svakog tehnicara koji je prijavljen za taj posao
+						//Izbaci posao iz liste poslova kod svakog tehnicara koji je prijavljen za taj posao
                         foreach(Technician tech in db.Job.Find((short)id).Technician)
                         {
                             tech.Job.Remove(job);
@@ -247,31 +248,6 @@ namespace SrceApplicaton.Controllers
             return ser.Serialize(list);
         }
 
-        // GET: Job/GetEvents
-        public string GetUsers()
-        {
-            var eventList = db.Job.Select(e => new {
-                id = e.JobID,
-                date = e.JobDate,
-                start = e.StartingHour,
-                end = e.EndingHour,
-                title = e.Title,
-                color = e.Color,
-                jobNotes = e.JobNotes
-            }).ToList();
-            var usersList = db.Technician.Select(e => new
-            {
-                name = e.Name,
-                lastName = e.LastName,
-                hours = e.WorkHours,
-                level = e.AccessLevel
-            }).ToList();
-
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-
-            return ser.Serialize(usersList);
-        }
-
 
         public string FormData(DateTime date, TimeSpan time)
         {
@@ -342,6 +318,31 @@ namespace SrceApplicaton.Controllers
             JavaScriptSerializer ser = new JavaScriptSerializer();
             var result = ser.Serialize(userJobs.Select(d => d.JobID).ToList());
             return result;
+        }
+		
+		 // GET: Job/GetUsers
+        public string GetUsers()
+        {
+            var eventList = db.Job.Select(e => new {
+                id = e.JobID,
+                date = e.JobDate,
+                start = e.StartingHour,
+                end = e.EndingHour,
+                title = e.Title,
+                color = e.Color,
+                jobNotes = e.JobNotes
+            }).ToList();
+            var usersList = db.Technician.Select(e => new
+            {
+                name = e.Name,
+                lastName = e.LastName,
+                hours = e.WorkHours,
+                level = e.AccessLevel
+            }).ToList();
+
+            JavaScriptSerializer ser = new JavaScriptSerializer();
+
+            return ser.Serialize(usersList);
         }
     }
 }
