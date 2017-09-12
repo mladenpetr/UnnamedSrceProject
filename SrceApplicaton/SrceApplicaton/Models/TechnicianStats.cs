@@ -12,21 +12,22 @@
 namespace SrceApplicaton.Models
 {
 
-    using System;
+using System;
     using System.Collections.Generic;
+    
+public partial class TechnicianStats
+{
 
-    public partial class TechnicianStats
-    {
+    public short StatsID { get; set; }
 
-        public short StatsID { get; set; }
+    public Nullable<short> WorkHours { get; set; }
 
-        public Nullable<short> WorkHours { get; set; }
+    public Nullable<short> ThisMonthSalary { get; set; }
 
-        public Nullable<short> ThisMonthSalary { get; set; }
+    public Nullable<short> ThisYearSalary { get; set; }
 
-        public Nullable<short> ThisYearSalary { get; set; }
+    public Nullable<short> LastMonthSalary { get; set; }
 
-        public Nullable<short> LastMonthSalary { get; set; }
+}
 
-    }
 }

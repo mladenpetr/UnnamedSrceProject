@@ -26,10 +26,10 @@ public partial class SrceAppDatabase1Entities : DbContext
 
     }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
-        {
-            throw new UnintentionalCodeFirstException();
-        }
+    protected override void OnModelCreating(DbModelBuilder modelBuilder)
+    {
+        throw new UnintentionalCodeFirstException();
+    }
 
 
     public virtual DbSet<Job> Job { get; set; }
