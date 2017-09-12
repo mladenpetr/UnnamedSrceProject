@@ -18,7 +18,7 @@
           <Property Name="Color" Type="char" MaxLength="10" />
           <Property Name="Title" Type="nvarchar" MaxLength="50" />
           <Property Name="JobState" Type="tinyint" />
-          <Property Name="TehnicianNumber" Type="tinyint" />
+          <Property Name="TechnicianNumber" Type="tinyint" />
         </EntityType>
         <EntityType Name="JobTechnician">
           <Key>
@@ -145,7 +145,7 @@
           <Property Name="Color" Type="String" MaxLength="10" FixedLength="true" Unicode="false" />
           <Property Name="Title" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="JobState" Type="Byte" />
-          <Property Name="TehnicianNumber" Type="Byte" />
+          <Property Name="TechnicianNumber" Type="Byte" />
         </EntityType>
         <EntityType Name="JobTemplates">
           <Key>
@@ -231,7 +231,7 @@
           <EntitySetMapping Name="Job">
             <EntityTypeMapping TypeName="SrceModel.Job">
               <MappingFragment StoreEntitySet="Job">
-                <ScalarProperty Name="TehnicianNumber" ColumnName="TehnicianNumber" />
+                <ScalarProperty Name="TechnicianNumber" ColumnName="TechnicianNumber" />
                 <ScalarProperty Name="JobState" ColumnName="JobState" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="Color" ColumnName="Color" />

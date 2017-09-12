@@ -7,7 +7,7 @@ using SrceApplicaton.Models;
 using System.Data.Entity;
 using System.Web.Script.Serialization;
 using System.Web.Services;
-
+using System.Text;
 
 namespace SrceApplicaton.Controllers
 {
@@ -70,7 +70,7 @@ namespace SrceApplicaton.Controllers
                     EndingHour = endTime,
                     JobDate = DateTime.Parse(start.Split('T')[0]),
                     JobState = 0,
-                    TehnicianNumber = 2
+                    TechnicianNumber = 2
                 };
                 db.Job.Add(newJob);
                 db.SaveChanges();
@@ -238,7 +238,8 @@ namespace SrceApplicaton.Controllers
                 end = e.EndingHour,
                 title = e.Title,
                 color = e.Color,
-                jobNotes = e.JobNotes
+                jobTemplate = e.TemplateID,
+                jobState = e.JobState
             }).ToList();
 
             var list = new List<object>();
@@ -252,7 +253,8 @@ namespace SrceApplicaton.Controllers
                     end = FormData(job.date, job.end),
                     title = job.title,
                     color = job.color,
-                    notes = job.jobNotes
+                    templateInfo = job.jobTemplate.Equals(null)?null:TemplateInfo((byte)job.jobTemplate),
+                    jobState = job.jobState
                 });
             }
 
@@ -276,9 +278,6 @@ namespace SrceApplicaton.Controllers
             Technician user = Session["user"] as Technician;
 
             Job job = db.Job.Find((short)id);
-
-            string newNotes = "rekoniguracija 50stolova, pozvat odrzavanje ak treba pomoc";
-            job.JobNotes = newNotes;
             if (job.Title == null)
             {
                 job.Title = user.Name + " " + user.LastName;
@@ -294,7 +293,6 @@ namespace SrceApplicaton.Controllers
             {
                 new EntryPointNotFoundException();
             }
-            job.JobNotes += user.Name + " " + user.LastName + "\n";
             if (ModelState.IsValid)
             {
                 db.Technician.Find(user.TechnicianID).Job.Add(job);
@@ -358,6 +356,52 @@ namespace SrceApplicaton.Controllers
             JavaScriptSerializer ser = new JavaScriptSerializer();
 
             return ser.Serialize(usersList);
+        }
+
+        public string TemplateInfo(byte templateID)
+        {
+            JobTemplates model = db.JobTemplates.Find(templateID);
+            bool chairs = false;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("U dvorani " + model.Hall + " potrebno je");
+            if (model.Chairs != null)
+            {
+                chairs = true;
+                sb.Append(" složiti " + model.Chairs + " stolica");
+                if (model.ChairLayout != null)
+                {
+                    sb.Append(" u formaciju " + model.ChairLayout + ".");
+                }
+                sb.AppendLine();
+            }
+            if (model.Tables != null)
+            {
+                if (chairs)
+                {
+                    sb.Append("Uz to potrebno je složiti ");
+                }
+                else
+                {
+                    sb.Append("složiti ");
+                }
+                sb.Append(model.Tables + " stolova");
+                if (model.TablesLayout != null)
+                {
+                    sb.Append(" u formaciju " + model.TablesLayout);
+                }
+                sb.AppendLine();
+            }
+            if (model.ExtraNotes != null)
+            {
+                sb.Append("Dodatne napomene: ");
+                sb.Append(model.ExtraNotes);
+                sb.AppendLine();
+            }
+            sb.AppendLine();
+            sb.Append("Dvoranu ");
+            string str = model.Wall ? "treba pregraditi." : "nije potrebno pregraditi.";
+            sb.Append(str);
+            return sb.ToString();
         }
     }
 }
