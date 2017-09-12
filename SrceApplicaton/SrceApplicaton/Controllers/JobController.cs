@@ -201,9 +201,9 @@ namespace SrceApplicaton.Controllers
                 {
                     if (ModelState.IsValid)
                     {
-                        db.Job.Find(id).StartingHour = TimeSpan.Parse(start.Split('T')[1]);
-                        db.Job.Find(id).EndingHour = TimeSpan.Parse(end.Split('T')[1]);
-                        db.Job.Find(id).JobDate = DateTime.Parse(end.Split('T')[0]);
+                        job.StartingHour = TimeSpan.Parse(start.Split('T')[1]);
+                        job.EndingHour = TimeSpan.Parse(end.Split('T')[1]);
+                        job.JobDate = DateTime.Parse(end.Split('T')[0]);
                         db.SaveChanges();
                     }
                 }
@@ -265,29 +265,31 @@ namespace SrceApplicaton.Controllers
         public ActionResult CheckIn(int id)
         {
             Technician user = Session["user"] as Technician;
-            using (var db = new SrceAppDatabase1Entities())
-            {
-                Job job = db.Job.Find((short)id);
-                if (job.Title == null)
-                {
-                    job.Title = user.Name + " " + user.LastName;
-                    job.Color = user.Color;
-                }
-                else
-                {
-                    job.Title += user.Name + " " + user.LastName + ", ";
-                    job.Color = "#9f00ff";
-                }
 
-                if (job == null)
-                {
-                    new EntryPointNotFoundException();
-                }
-                if (ModelState.IsValid)
-                {
-                    db.Technician.Find(user.TechnicianID).Job.Add(job);
-                    db.SaveChanges();
-                }
+            using (var db = new SrceAppDatabase1Entities())
+			{
+
+				Job job = db.Job.Find((short)id);
+				if (job.Title == null)
+				{
+					job.Title = user.Name + " " + user.LastName;
+					job.Color = user.Color;
+				}
+				else
+				{
+					job.Title += ", " + user.Name + " " + user.LastName;
+					job.Color = "#9f00ff";
+				}
+				
+				if (job == null)
+				{
+					new EntryPointNotFoundException();
+				}
+				if (ModelState.IsValid)
+				{
+					db.Technician.Find(user.TechnicianID).Job.Add(job);
+					db.SaveChanges();
+				}
             }
             return RedirectToAction("Index");
         }
@@ -296,23 +298,57 @@ namespace SrceApplicaton.Controllers
         public ActionResult CheckOut(int id)
         {
             Technician user = Session["user"] as Technician;
-            using (var db = new SrceAppDatabase1Entities())
-            {
-                Job job = db.Job.Find((short)id);
-                job.Color = null;
-                job.Title = null;
-                job.JobNotes = null;
-                if (job == null)
-                {
-                    new EntryPointNotFoundException();
-                }
 
-                if (ModelState.IsValid)
-                {
-                    db.Technician.Find(user.TechnicianID).Job.Remove(job);
-                    db.SaveChanges();
-                }
-            }
+            using (var db = new SrceAppDatabase1Entities())
+			{
+				Job job = db.Job.Find((short)id);
+	
+	
+				if (job == null)
+				{
+					new EntryPointNotFoundException();
+				}
+	
+	
+				if (ModelState.IsValid)
+				{
+					db.Technician.Find(user.TechnicianID).Job.Remove(job);
+					int numTech = db.Job.Find(id).Technician.Count();
+					if(numTech != 0)
+					{   
+						
+						if (numTech == 1) //Ako ostane jedan tehničar event oboja u boju tehničara i prikazano je ime tehničara
+						{   
+							var tech = db.Job.Find(id).Technician.First();
+							job.Color = tech.Color;
+							job.Title = tech.Name + " " + tech.LastName;
+						}
+						else
+						{   //Ukoliko ostane više tehničara miče se iz stringa title user-a koji se trenutno odjavio
+							List<string> title = job.Title.Split(new string[] { ", " }, StringSplitOptions.None).ToList();
+							int indexSubstring = title.IndexOf(user.Name + " " + user.LastName);
+							if(indexSubstring == 0)
+							{
+							job.Title =  job.Title.Replace(user.Name + " " + user.LastName + ", ", "");
+							}
+							else
+							{
+							job.Title = job.Title.Replace(", " + user.Name + " " + user.LastName, "");
+							}
+						}
+					}
+					else
+					{
+						job.Color = null; //Ako nema prijavljenih tehničara onda se vraća defaultni event
+						job.Title = null;
+						job.JobNotes = null;
+					}
+	
+					db.SaveChanges();
+	
+				}
+			}
+
             return RedirectToAction("Index");
         }
 
