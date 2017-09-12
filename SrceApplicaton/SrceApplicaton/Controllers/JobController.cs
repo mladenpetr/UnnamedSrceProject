@@ -70,7 +70,7 @@ namespace SrceApplicaton.Controllers
                     EndingHour = endTime,
                     JobDate = DateTime.Parse(start.Split('T')[0]),
                     JobState = 0,
-                    TehnicianNumber = 2
+                    TechnicianNumber = 2
                 };
                 db.Job.Add(newJob);
                 db.SaveChanges();
