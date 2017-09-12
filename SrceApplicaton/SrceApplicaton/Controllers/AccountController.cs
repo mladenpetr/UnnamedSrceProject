@@ -18,8 +18,6 @@ namespace SrceApplicaton.Controllers
     [MyAuthorization]
     public class AccountController : Controller
     {
-        private SrceAppDatabase1Entities db = new SrceAppDatabase1Entities();
-
         // GET: Account
         public ActionResult Index()
         {
@@ -43,35 +41,38 @@ namespace SrceApplicaton.Controllers
         {
             if (ModelState.IsValid)
             {
-                List<short> techIds = new List<short>(db.Technician.Count());
-                foreach (Technician tech in db.Technician)
+                using (var db = new SrceAppDatabase1Entities())
                 {
-                    techIds.Add(tech.TechnicianID);
+                    List<short> techIds = new List<short>(db.Technician.Count());
+                    foreach (Technician tech in db.Technician)
+                    {
+                        techIds.Add(tech.TechnicianID);
+                    }
+                    byte[] hashedPassword = GetHashedPassword(model.Password, model.Username);
+                    string storedPassword = Convert.ToBase64String(hashedPassword);
+                    Technician newUser = new Technician
+                    {
+                        TechnicianID = new JobController().checkId(techIds),
+                        Name = model.Name,
+                        LastName = model.LastName,
+                        PhoneNumber = model.PhoneNumber,
+                        DateOfBirth = model.DateOfBirth,
+                        DateHired = model.DateHired,
+                        Color = model.Color,
+                        email = model.email,
+                        Username = model.Username,
+                        Password = storedPassword,
+                        AccessLevel = "Technician",
+                        WorkHours = 0,
+                        ThisMonthSalary = 0,
+                        LastMonthSalary = 0,
+                        ThisYearSalary = 0
+
+                    };
+                    db.Technician.Add(newUser);
+                    db.SaveChanges();
+                    TempData["message"] = "Uspješno ste registrirali račun. Možete se ulogirati sa kreiranim podacima";
                 }
-                byte[] hashedPassword = GetHashedPassword(model.Password, model.Username);
-                string storedPassword = Convert.ToBase64String(hashedPassword);
-                Technician newUser = new Technician
-                {
-                    TechnicianID = new JobController().checkId(techIds),
-                    Name = model.Name,
-                    LastName = model.LastName,
-                    PhoneNumber = model.PhoneNumber,
-                    DateOfBirth = model.DateOfBirth,
-                    DateHired = model.DateHired,
-                    Color = model.Color,
-                    email = model.email,
-                    Username = model.Username,
-                    Password = storedPassword,
-                    AccessLevel = "Technician",
-                    WorkHours = 0,
-                    ThisMonthSalary = 0,
-                    LastMonthSalary = 0,
-                    ThisYearSalary = 0
-                    
-                };
-                db.Technician.Add(newUser);
-                db.SaveChanges();
-                TempData["message"] = "Uspješno ste registrirali račun. Možete se ulogirati sa kreiranim podacima";
                 return RedirectToAction("Index", "Home");
             }
             // If we got this far, something failed, redisplay form
@@ -86,7 +87,7 @@ namespace SrceApplicaton.Controllers
             {
                 sb.Append(username.Last());
             }
-            byte[] salt = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
+            byte[] salt = Encoding.UTF8.GetBytes(sb.ToString());
             var pbkdf2 = new Rfc2898DeriveBytes(password, salt, 1000);
             return pbkdf2.GetBytes(15);
 
@@ -128,10 +129,13 @@ namespace SrceApplicaton.Controllers
 
         private Technician AttemptLogIn(string username, string password)
         {
-            var hashedPassword = Convert.ToBase64String(GetHashedPassword(password, username));
-            var user = db.Technician.Where(u => u.Username == username && 
-                u.Password == hashedPassword).FirstOrDefault();
-            return user;
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                var hashedPassword = Convert.ToBase64String(GetHashedPassword(password, username));
+                var user = db.Technician.Where(u => u.Username == username &&
+                    u.Password == hashedPassword).FirstOrDefault();
+                return user;
+            }
         }
 
         [HttpPost]
@@ -144,17 +148,22 @@ namespace SrceApplicaton.Controllers
 
         public ActionResult AccountDetails()
         {
-            var user = (Session["user"] as Technician);
-            var currentUser = db.Technician.Find(user.TechnicianID);
-            return View(currentUser);
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                var user = (Session["user"] as Technician);
+                var currentUser = db.Technician.Find(user.TechnicianID);
+                return View(currentUser);
+            }
         }
 
         public ActionResult Edit()
         {
-            var user = (Session["user"] as Technician);
-            var currentUser = db.Technician.Find(user.TechnicianID);
-            
-            return View(currentUser);
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                var user = (Session["user"] as Technician);
+                var currentUser = db.Technician.Find(user.TechnicianID);
+                return View(currentUser);
+            }
         }
 
         [HttpPost]
@@ -163,17 +172,21 @@ namespace SrceApplicaton.Controllers
         {
             if (ModelState.IsValid)
             {
-                var usr = db.Technician.Find(user.TechnicianID);
-                usr.Name = user.Name;
-                usr.LastName = user.LastName;
-                usr.PhoneNumber = user.PhoneNumber;
-                usr.DateOfBirth = user.DateOfBirth;
-                usr.email = user.email;
-                db.SaveChanges();
-                TempData["message"] = "Uspješno ste promijenili osobne podatke!";
-                return View(db.Technician.Find(user.TechnicianID));
+                using (var db = new SrceAppDatabase1Entities())
+                {
+                    var usr = db.Technician.Find(user.TechnicianID);
+                    usr.Name = user.Name;
+                    usr.LastName = user.LastName;
+                    usr.PhoneNumber = user.PhoneNumber;
+                    usr.DateOfBirth = user.DateOfBirth;
+                    usr.email = user.email;
+                    db.SaveChanges();
+                    TempData["message"] = "Uspješno ste promijenili osobne podatke!";
+                    return View(db.Technician.Find(user.TechnicianID));
+                }
+                return View(user);
             }
-            return View(user);
+            return HttpNotFound("Došlo je do greške");
         }
     }
 }

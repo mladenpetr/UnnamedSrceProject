@@ -14,7 +14,6 @@ namespace SrceApplicaton.Controllers
     [MyAuthorization]
     public class JobController : Controller
     {
-        private SrceAppDatabase1Entities db = new SrceAppDatabase1Entities();
         // GET: Job
         public ActionResult Index()
         {
@@ -44,38 +43,41 @@ namespace SrceApplicaton.Controllers
         {
             if (ModelState.IsValid)
             {
-
-                List<short> jobIds = new List<short>(db.Job.Count()); // stvaranje liste sa svim JobId u bazi
-                foreach (Job job in db.Job)
+                using (var db = new SrceAppDatabase1Entities())
                 {
-                    jobIds.Add(job.JobID);
-                }
+                    List<short> jobIds = new List<short>(db.Job.Count()); // stvaranje liste sa svim JobId u bazi
+                    foreach (Job job in db.Job)
+                    {
+                        jobIds.Add(job.JobID);
+                    }
 
-                TimeSpan startTime;
-                TimeSpan endTime;
-                if (String.Equals(view, "month")){
-                    startTime = new TimeSpan(16, 00, 00);
-                    endTime = new TimeSpan(18, 00, 00);
-                }
-                else
-                {
-                    startTime = TimeSpan.Parse(start.Split('T')[1]);
-                    endTime = TimeSpan.Parse(end.Split('T')[1]);
-                }
+                    TimeSpan startTime;
+                    TimeSpan endTime;
+                    if (String.Equals(view, "month"))
+                    {
+                        startTime = new TimeSpan(16, 00, 00);
+                        endTime = new TimeSpan(18, 00, 00);
+                    }
+                    else
+                    {
+                        startTime = TimeSpan.Parse(start.Split('T')[1]);
+                        endTime = TimeSpan.Parse(end.Split('T')[1]);
+                    }
 
-                Job newJob = new Job
-                {
-                    JobID = checkId(jobIds),
-                    StartingHour = startTime,
-                    EndingHour = endTime,
-                    JobDate = DateTime.Parse(start.Split('T')[0]),
-                    JobState = 0,
-                    TechnicianNumber = 2
-                };
-                db.Job.Add(newJob);
-                db.SaveChanges();
-                TempData["message"] = "Posao je uspješno dodan!";
-                return View("Index");
+                    Job newJob = new Job
+                    {
+                        JobID = checkId(jobIds),
+                        StartingHour = startTime,
+                        EndingHour = endTime,
+                        JobDate = DateTime.Parse(start.Split('T')[0]),
+                        JobState = 0,
+                        TechnicianNumber = 2
+                    };
+                    db.Job.Add(newJob);
+                    db.SaveChanges();
+                    TempData["message"] = "Posao je uspješno dodan!";
+                    return View("Index");
+                }
             }
             return View();
         }
@@ -99,7 +101,10 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Edit/5
         public ActionResult Edit(short id)
         {
-            return View(db.Job.Find(id));
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                return View(db.Job.Find(id));
+            }
         }
 
         // POST: Job/Edit/5
@@ -108,25 +113,28 @@ namespace SrceApplicaton.Controllers
         {
             if (ModelState.IsValid)
             {
-                var jb = db.Job.Find(job.JobID);
-                jb.Title = job.Title;
-                jb.StartingHour = job.StartingHour;
-                jb.EndingHour = job.EndingHour;
-                jb.JobNotes = job.JobNotes;
-                jb.JobDate = job.JobDate;
-                if (job.JobTemplates != null)
+                using (var db = new SrceAppDatabase1Entities())
                 {
-                    jb.JobTemplates.Hall = job.JobTemplates.Hall;
-                    jb.JobTemplates.Chairs = job.JobTemplates.Chairs;
-                    jb.JobTemplates.ChairLayout = job.JobTemplates.ChairLayout;
-                    jb.JobTemplates.Tables = job.JobTemplates.Tables;
-                    jb.JobTemplates.TablesLayout = job.JobTemplates.TablesLayout;
-                    jb.JobTemplates.ExtraNotes = job.JobTemplates.ExtraNotes;
-                    jb.JobTemplates.Wall = job.JobTemplates.Wall;
+                    var jb = db.Job.Find(job.JobID);
+                    jb.Title = job.Title;
+                    jb.StartingHour = job.StartingHour;
+                    jb.EndingHour = job.EndingHour;
+                    jb.JobNotes = job.JobNotes;
+                    jb.JobDate = job.JobDate;
+                    if (job.JobTemplates != null)
+                    {
+                        jb.JobTemplates.Hall = job.JobTemplates.Hall;
+                        jb.JobTemplates.Chairs = job.JobTemplates.Chairs;
+                        jb.JobTemplates.ChairLayout = job.JobTemplates.ChairLayout;
+                        jb.JobTemplates.Tables = job.JobTemplates.Tables;
+                        jb.JobTemplates.TablesLayout = job.JobTemplates.TablesLayout;
+                        jb.JobTemplates.ExtraNotes = job.JobTemplates.ExtraNotes;
+                        jb.JobTemplates.Wall = job.JobTemplates.Wall;
+                    }
+                    db.SaveChanges();
+                    TempData["message"] = "Uspješno ste promijenili podatke o poslu!";
+                    return View(db.Job.Find(job.JobID));
                 }
-                db.SaveChanges();
-                TempData["message"] = "Uspješno ste promijenili podatke o poslu!";
-                return View(db.Job.Find(job.JobID));
             }
             return View(job);
         }
@@ -134,50 +142,35 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Delete/5
         public ActionResult Delete(int id)
         {
-            try
+            if (ModelState.IsValid)
             {
-                var job = db.Job.Find((short)id);
-                if (job != null)
+                using (var db = new SrceAppDatabase1Entities())
                 {
-					
-                    if (ModelState.IsValid)
+                    var job = db.Job.Find((short)id);
+                    if (job != null)
                     {
-						//Izbaci posao iz liste poslova kod svakog tehnicara koji je prijavljen za taj posao
-                        foreach(Technician tech in db.Job.Find((short)id).Technician)
+
+                        if (ModelState.IsValid)
                         {
-                            tech.Job.Remove(job);
+                            //Izbaci posao iz liste poslova kod svakog tehnicara koji je prijavljen za taj posao
+                            foreach (Technician tech in db.Job.Find((short)id).Technician)
+                            {
+                                tech.Job.Remove(job);
+                            }
+                            db.Job.Remove(job);
+                            db.SaveChanges();
                         }
-                        db.Job.Remove(job);
-                        db.SaveChanges();
                     }
                 }
-                return RedirectToAction("Index");
-            } catch
-            {
-                return HttpNotFound("Greška kod brisanja!");
+                return RedirectToAction("Index");  
             }
-        }
-
-        // POST: Job/Delete/5
-        [HttpPost]
-        public ActionResult Delete(int id, FormCollection collection)
-        {
-            try
-            {
-                // TODO: Add delete logic here
-
-                return RedirectToAction("Index");
-            }
-            catch
-            {
-                return View();
-            }
+            return HttpNotFound("Greška kod brisanja!");
         }
 
         // GET: Job/ResizeEvent
         public ActionResult ResizeEvent(int id, string end)
         {
-            try
+            using (var db = new SrceAppDatabase1Entities())
             {
                 var job = db.Job.Find(id);
                 if (job != null)
@@ -194,19 +187,14 @@ namespace SrceApplicaton.Controllers
 
                     }
                 }
-
-                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+            return RedirectToAction("Index");
         }
 
         // GET: Job/DropEvent
         public ActionResult DropEvent(int id, string start, string end)
         {
-            try
+            using (var db = new SrceAppDatabase1Entities())
             {
                 var job = db.Job.Find(id);
                 if (job != null)
@@ -219,48 +207,47 @@ namespace SrceApplicaton.Controllers
                         db.SaveChanges();
                     }
                 }
-
-                return RedirectToAction("Index");
             }
-            catch
-            {
-                return View();
-            }
+            return RedirectToAction("Index");
+            
         }
 
         // GET: Job/GetEvents
         public string GetEvents()
         {
-            var eventList = db.Job.Select(e => new {
-                id = e.JobID,
-                date = e.JobDate,
-                start = e.StartingHour,
-                end = e.EndingHour,
-                title = e.Title,
-                color = e.Color,
-                jobTemplate = e.TemplateID,
-                jobState = e.JobState
-            }).ToList();
-
-            var list = new List<object>();
-
-            foreach (var job in eventList)
+            using (var db = new SrceAppDatabase1Entities())
             {
-               list.Add(new
+                var eventList = db.Job.Select(e => new
                 {
-                    id = job.id,
-                    start = FormData(job.date, job.start),
-                    end = FormData(job.date, job.end),
-                    title = job.title,
-                    color = job.color,
-                    templateInfo = job.jobTemplate.Equals(null)?null:TemplateInfo((byte)job.jobTemplate),
-                    jobState = job.jobState
-                });
+                    id = e.JobID,
+                    date = e.JobDate,
+                    start = e.StartingHour,
+                    end = e.EndingHour,
+                    title = e.Title,
+                    color = e.Color,
+                    jobTemplate = e.TemplateID,
+                    jobState = e.JobState
+                }).ToList();
+
+                var list = new List<object>();
+
+                foreach (var job in eventList)
+                {
+                    list.Add(new
+                    {
+                        id = job.id,
+                        start = FormData(job.date, job.start),
+                        end = FormData(job.date, job.end),
+                        title = job.title,
+                        color = job.color,
+                        templateInfo = job.jobTemplate.Equals(null) ? null : TemplateInfo((byte)job.jobTemplate),
+                        jobState = job.jobState
+                    });
+                }
+
+                JavaScriptSerializer ser = new JavaScriptSerializer();
+                return ser.Serialize(list);
             }
-
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-
-            return ser.Serialize(list);
         }
 
 
@@ -276,27 +263,29 @@ namespace SrceApplicaton.Controllers
         public ActionResult CheckIn(int id)
         {
             Technician user = Session["user"] as Technician;
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                Job job = db.Job.Find((short)id);
+                if (job.Title == null)
+                {
+                    job.Title = user.Name + " " + user.LastName;
+                    job.Color = user.Color;
+                }
+                else
+                {
+                    job.Title += user.Name + " " + user.LastName + ", ";
+                    job.Color = "#9f00ff";
+                }
 
-            Job job = db.Job.Find((short)id);
-            if (job.Title == null)
-            {
-                job.Title = user.Name + " " + user.LastName;
-                job.Color = user.Color;
-            }
-            else
-            {
-                job.Title += user.Name + " " + user.LastName + ", ";
-                job.Color = "#9f00ff";
-            }
-            
-            if (job == null)
-            {
-                new EntryPointNotFoundException();
-            }
-            if (ModelState.IsValid)
-            {
-                db.Technician.Find(user.TechnicianID).Job.Add(job);
-                db.SaveChanges();
+                if (job == null)
+                {
+                    new EntryPointNotFoundException();
+                }
+                if (ModelState.IsValid)
+                {
+                    db.Technician.Find(user.TechnicianID).Job.Add(job);
+                    db.SaveChanges();
+                }
             }
             return RedirectToAction("Index");
         }
@@ -304,19 +293,22 @@ namespace SrceApplicaton.Controllers
         public ActionResult CheckOut(int id)
         {
             Technician user = Session["user"] as Technician;
-            Job job = db.Job.Find((short)id);
-            job.Color = null;
-            job.Title = null;
-            job.JobNotes = null;
-            if (job == null)
+            using (var db = new SrceAppDatabase1Entities())
             {
-                new EntryPointNotFoundException();
-            }
+                Job job = db.Job.Find((short)id);
+                job.Color = null;
+                job.Title = null;
+                job.JobNotes = null;
+                if (job == null)
+                {
+                    new EntryPointNotFoundException();
+                }
 
-            if (ModelState.IsValid)
-            {
-                db.Technician.Find(user.TechnicianID).Job.Remove(job);
-                db.SaveChanges();
+                if (ModelState.IsValid)
+                {
+                    db.Technician.Find(user.TechnicianID).Job.Remove(job);
+                    db.SaveChanges();
+                }
             }
             return RedirectToAction("Index");
         }
@@ -326,82 +318,92 @@ namespace SrceApplicaton.Controllers
         [WebMethod]
         public string GetUserEvents(int id)
         {
-            var user = Session["user"] as Technician;
-            var userJobs = db.Technician.Find(user.TechnicianID).Job;
-            JavaScriptSerializer ser = new JavaScriptSerializer();
-            var result = ser.Serialize(userJobs.Select(d => d.JobID).ToList());
-            return result;
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                var user = Session["user"] as Technician;
+                var userJobs = db.Technician.Find(user.TechnicianID).Job;
+                JavaScriptSerializer ser = new JavaScriptSerializer();
+                var result = ser.Serialize(userJobs.Select(d => d.JobID).ToList());
+                return result;
+            }
         }
 		
 		 // GET: Job/GetUsers
         public string GetUsers()
         {
-            var eventList = db.Job.Select(e => new {
-                id = e.JobID,
-                date = e.JobDate,
-                start = e.StartingHour,
-                end = e.EndingHour,
-                title = e.Title,
-                color = e.Color,
-                jobNotes = e.JobNotes
-            }).ToList();
-            var usersList = db.Technician.Select(e => new
+            using (var db = new SrceAppDatabase1Entities())
             {
-                name = e.Name,
-                lastName = e.LastName,
-                hours = e.WorkHours,
-                level = e.AccessLevel
-            }).ToList();
+                var eventList = db.Job.Select(e => new
+                {
+                    id = e.JobID,
+                    date = e.JobDate,
+                    start = e.StartingHour,
+                    end = e.EndingHour,
+                    title = e.Title,
+                    color = e.Color,
+                    jobNotes = e.JobNotes
+                }).ToList();
+                var usersList = db.Technician.Select(e => new
+                {
+                    name = e.Name,
+                    lastName = e.LastName,
+                    hours = e.WorkHours,
+                    level = e.AccessLevel
+                }).ToList();
 
-            JavaScriptSerializer ser = new JavaScriptSerializer();
+                JavaScriptSerializer ser = new JavaScriptSerializer();
 
-            return ser.Serialize(usersList);
+                return ser.Serialize(usersList);
+            }
         }
 
         public string TemplateInfo(byte templateID)
         {
-            JobTemplates model = db.JobTemplates.Find(templateID);
-            bool chairs = false;
-            StringBuilder sb = new StringBuilder();
-            sb.Append("U dvorani " + model.Hall + " potrebno je");
-            if (model.Chairs != null)
+            using (var db = new SrceAppDatabase1Entities())
             {
-                chairs = true;
-                sb.Append(" složiti " + model.Chairs + " stolica");
-                if (model.ChairLayout != null)
+                JobTemplates model = db.JobTemplates.Find(templateID);
+                bool chairs = false;
+                StringBuilder sb = new StringBuilder();
+                sb.Append("U dvorani " + model.Hall + " potrebno je");
+                if (model.Chairs != null)
                 {
-                    sb.Append(" u formaciju " + model.ChairLayout + ".");
+                    chairs = true;
+                    sb.Append(" složiti " + model.Chairs + " stolica");
+                    if (model.ChairLayout != null)
+                    {
+                        sb.Append(" u formaciju " + model.ChairLayout + ".");
+                    }
+                    sb.AppendLine();
+                }
+                if (model.Tables != null)
+                {
+                    if (chairs)
+                    {
+                        sb.Append("Uz to potrebno je složiti ");
+                    }
+                    else
+                    {
+                        sb.Append("složiti ");
+                    }
+                    sb.Append(model.Tables + " stolova");
+                    if (model.TablesLayout != null)
+                    {
+                        sb.Append(" u formaciju " + model.TablesLayout);
+                    }
+                    sb.AppendLine();
+                }
+                if (model.ExtraNotes != null)
+                {
+                    sb.Append("Dodatne napomene: ");
+                    sb.Append(model.ExtraNotes);
+                    sb.AppendLine();
                 }
                 sb.AppendLine();
+                sb.Append("Dvoranu ");
+                string str = model.Wall ? "treba pregraditi." : "nije potrebno pregraditi.";
+                sb.Append(str);
+                return sb.ToString();
             }
-            if (model.Tables != null)
-            {
-                if (chairs)
-                {
-                    sb.Append("Uz to potrebno je složiti ");
-                }
-                else
-                {
-                    sb.Append("složiti ");
-                }
-                sb.Append(model.Tables + " stolova");
-                if (model.TablesLayout != null)
-                {
-                    sb.Append(" u formaciju " + model.TablesLayout);
-                }
-                sb.AppendLine();
-            }
-            if (model.ExtraNotes != null)
-            {
-                sb.Append("Dodatne napomene: ");
-                sb.Append(model.ExtraNotes);
-                sb.AppendLine();
-            }
-            sb.AppendLine();
-            sb.Append("Dvoranu ");
-            string str = model.Wall ? "treba pregraditi." : "nije potrebno pregraditi.";
-            sb.Append(str);
-            return sb.ToString();
         }
     }
 }
