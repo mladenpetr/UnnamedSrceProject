@@ -112,14 +112,18 @@
             //dodaje posao u korisnikovu listu prijavljenih poslova.
             function checkIn() {
                 var urltoAction = '@Url.Action("CheckIn", "Job")';
-                    $.ajax({
-                        url: urltoAction,
-                        data: {
-                            'id': currentEvent.id
-                        }
-                    }).done(function () {
-                        $('.check-in').hide();
-                        $('#calendar').fullCalendar('refetchEvents');
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'id': currentEvent.id
+                    }
+                }).done(function () {
+                    if (TempData["message"]!=null) { 
+                    $('.check-in').hide();
+                    $('#calendar').fullCalendar('refetchEvents');
+                    } else {
+                        @TempData["message"];
+                    }
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
@@ -161,17 +165,19 @@
         //funkcija koja prikazuje prikladni meni u ovisnosti o trenutnom stanju posla
         //Ako je posao već prijavljen od strane tehničara, prikazuje se opcija odjave i obrnuto.
             function checkJob(calEvent, techEvents) {
-                if (!isJobChecked(calEvent, techEvents)) {
-                    if ($('.check-in').is(':visible')) {
-                        $('.check-in').hide();
+                if (calEvent.jobState == 0) {
+                    if (!isJobChecked(calEvent, techEvents)) {
+                        if ($('.check-in').is(':visible')) {
+                            $('.check-in').hide();
+                        } else {
+                            $('.check-in').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                        }
                     } else {
-                        $('.check-in').css({ 'top': mouseY, 'left': mouseX }).show('slow');
-                    }
-                } else {
-                    if ($('.check-out').is(':visible')) {
-                        $('.check-out').hide();
-                    } else {
-                        $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                        if ($('.check-out').is(':visible')) {
+                            $('.check-out').hide();
+                        } else {
+                            $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                        }
                     }
                 }
             }
@@ -262,7 +268,7 @@
                     var dateStart = moment(event.start).format('YYYY/MM/DD');
                     var dateEnd = moment(event.end).format('YYYY/MM/DD');
 
-                     if (dateStart < dateEnd) { //Ako je resize pređe u drugi dan onda vrati event u početno stanje
+                    if (dateStart < dateEnd || (event.jobState == 2 && user.accessLevel == "Technician")) { //Ako je resize pređe u drugi dan onda vrati event u početno stanje
                          revertFunc();
                      } else {
                         resizeEvent(revertFunc); //Napravi ajax poziv za izmijenu parametara eventa
@@ -271,7 +277,11 @@
 
                 eventDrop: function (event, delta, revertFunc) {
                     currentEvent = event;
-                    dropEvent(revertFunc); //Napravi ajax poziv za izmijenu parametara eventa
+                    if (event.jobState >= 1 && user.accessLevel == "Technician") {
+                        revertFunc();
+                    } else {
+                        dropEvent(revertFunc); //Napravi ajax poziv za izmijenu parametara eventa
+                    }
                 },
 
                 dayClick: function (date, jsEvent, view) {
@@ -303,8 +313,9 @@
                 //tooltip sa dodatnim biljeskama
                 eventMouseover: function (event, jsEvent, view){
                     if (event.title != null) {
+
                         var tooltip = '<div class="tooltipevent" style="width:300px;height:200px;background:#ccc;position:absolute;z-index:10001;">Radi/e: '
-                            + event.title + '</br>Bilješka: ' + event.notes + '</div>';
+                            + event.title + '</br>Bilješka: ' + event.templateInfo + '</div>';
                         var $tooltip = $(tooltip).appendTo('body');
 
                         $(this).mouseover(function (e) {
