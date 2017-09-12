@@ -118,12 +118,8 @@
                         'id': currentEvent.id
                     }
                 }).done(function () {
-                    if (TempData["message"]!=null) { 
                     $('.check-in').hide();
                     $('#calendar').fullCalendar('refetchEvents');
-                    } else {
-                        @TempData["message"];
-                    }
                     }).fail(function () {
                             alert('Dogodila se greška!')
                         });
