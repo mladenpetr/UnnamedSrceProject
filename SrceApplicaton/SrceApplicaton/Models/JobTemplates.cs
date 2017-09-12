@@ -21,7 +21,9 @@ public partial class JobTemplates
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
     public JobTemplates()
     {
+
         this.Job = new HashSet<Job>();
+
     }
 
 
