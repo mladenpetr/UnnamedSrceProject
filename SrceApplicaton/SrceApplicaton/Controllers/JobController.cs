@@ -212,7 +212,7 @@ namespace SrceApplicaton.Controllers
             
         }
 
-        // GET: Job/GetEvents
+        // Dohvaćanje svih poslova iz baze...
         public string GetEvents()
         {
             using (var db = new SrceAppDatabase1Entities())
@@ -250,7 +250,8 @@ namespace SrceApplicaton.Controllers
             }
         }
 
-
+        //Formatiranje datuma u prikaz koji fullcalendar prepoznaje
+        //Povratna vrijednost je string koji sadrži pravilan format prikaza podatka.
         public string FormData(DateTime date, TimeSpan time)
         {
             string month = date.Month < 10 ? "0" + date.Month.ToString() : date.Month.ToString();
@@ -260,6 +261,7 @@ namespace SrceApplicaton.Controllers
             return tempDate + "T" + time;
         }
 
+        //Metoda koja se poziva pri prijavi tehničara na određeni posao
         public ActionResult CheckIn(int id)
         {
             Technician user = Session["user"] as Technician;
@@ -290,6 +292,7 @@ namespace SrceApplicaton.Controllers
             return RedirectToAction("Index");
         }
 
+        //Metoda koja se poziva kada tehničar odjavljuje posao
         public ActionResult CheckOut(int id)
         {
             Technician user = Session["user"] as Technician;
@@ -357,6 +360,9 @@ namespace SrceApplicaton.Controllers
             }
         }
 
+        //Metoda koja generira tekst rekonfiguracije na osnovi podataka iz baze
+        //Ulazni parametar je ID rekonfiguracije
+        //Povratna vrijednost je generirani string koji služi za jednostavniji prikaz rekonfiguracije klijentu.
         public string TemplateInfo(byte templateID)
         {
             using (var db = new SrceAppDatabase1Entities())
