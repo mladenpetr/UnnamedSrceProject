@@ -191,7 +191,15 @@
                 return false;
             }
 
-
+            function assignTechnicians() {
+                var urltoAction = '@Url.Action("AssignTechnicians","Job")'
+                $.ajax({
+                    url: urltoAction,
+                    success: function () {
+                        $('#calendar').fullCalendar('refetchEvents');
+                    }
+                })
+            }
 
 
         //praćenje koordinata miša zbog pozicioniranja menia pri kliku
@@ -354,23 +362,26 @@
         if (user.AccessLevel == "Employer")
         {
             <div class="fc-popover add" style="z-index:10;display:none">
-                <btn class="fc-button" onclick="addEvent()">Dodaj Posao</btn>
+                <button class="fc-button" onclick="addEvent()">Dodaj Posao</button>
+            </div>
+            <div>
+                <button class="btn-danger" onclick="assignTechnicians()">Raspodjeli tehničare</button>
             </div>
             <div class="fc-popover edit" style="z-index:10;display:none">
                 <ul>
-                    <li><btn class="fc-button" onclick="showTemplates()">Dodaj rekonfiguraciju</btn></li>
-                    <li><btn class="fc-button" onclick="editEvent()">Uredi posao</btn></li>
-                    <li><btn class="fc-button" onclick="deleteEvent()">Izbriši posao</btn></li>
+                    <li><button class="fc-button" onclick="showTemplates()">Dodaj rekonfiguraciju</button></li>
+                    <li><button class="fc-button" onclick="editEvent()">Uredi posao</button></li>
+                    <li><button class="fc-button" onclick="deleteEvent()">Izbriši posao</button></li>
                 </ul>
             </div>
         }
         else if (user.AccessLevel == "Technician")
         {
             <div class="fc-popover check-in" style="z-index:10;display:none">
-                <btn class="fc-button" onclick="checkIn()">Prijavi se za Posao</btn>
+                <button class="fc-button" onclick="checkIn()">Prijavi se za Posao</button>
             </div>
             <div class="fc-popover check-out" style="z-index:10;display:none">
-                <btn class="fc-button" onclick="checkOut()">Odjavi posao</btn>
+                <button class="fc-button" onclick="checkOut()">Odjavi posao</button>
             </div>
         }
     }

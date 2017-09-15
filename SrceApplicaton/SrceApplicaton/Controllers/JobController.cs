@@ -101,10 +101,9 @@ namespace SrceApplicaton.Controllers
         // GET: Job/Edit/5
         public ActionResult Edit(short id)
         {
-            using (var db = new SrceAppDatabase1Entities())
-            {
-                return View(db.Job.Find(id));
-            }
+            var db = new SrceAppDatabase1Entities();
+            var job = db.Job.Find(id);
+            return View(job);
         }
 
         // POST: Job/Edit/5
@@ -446,6 +445,61 @@ namespace SrceApplicaton.Controllers
                 sb.Append(str);
                 return sb.ToString();
             }
+        }
+
+        //Metoda koja raspodjeljuje tehničarima poslova
+        //Glavni (i trenutno jedini) kriterij je broj odrađenih sati ovaj mjesec
+        //cilj je ravnomjerno raspodjeliti sate tehničarima tako da na kraju mjeseca imaju relativno slične plaće
+        public void AssignTechnicians()
+        {
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                var jobs = db.Job.Where(m => m.JobState == 0);
+                foreach (var job in jobs)
+                {
+                    var technicians = job.Technician.ToList();
+                    var orderedTechnicians = technicians.OrderBy(m => m.WorkHours).ToArray();
+                    for (int i = technicians.Count - 1; i >= job.TechnicianNumber; i--)
+                    {
+                        var user = orderedTechnicians[i];
+                        List<string> title = job.Title.Split(new string[] { ", " }, StringSplitOptions.None).ToList();
+                        int indexSubstring = title.IndexOf(user.Name + " " + user.LastName);
+                        if (indexSubstring == 0)
+                        {
+                            job.Title = job.Title.Replace(user.Name + " " + user.LastName + ", ", "");
+                        }
+                        else
+                        {
+                            job.Title = job.Title.Replace(", " + user.Name + " " + user.LastName, "");
+                        }
+                        job.Technician.Remove(user);
+                    }
+                    if (job.TechnicianNumber == 1)
+                    {
+                        job.Color = job.Technician.First().Color;
+                    }
+                    foreach (Technician user in job.Technician)
+                    {
+                        UpdateHours(user, job);
+                    }
+                    job.JobState = 1;
+                }
+                db.SaveChanges();
+            }
+            return;
+        }
+
+        private void UpdateHours(Technician user, Job job)
+        {
+            byte hours = 0;
+            var diff = job.EndingHour.Subtract(job.StartingHour);
+            hours = (byte)diff.Hours;
+            if (diff.Minutes != 0)
+            {
+                hours++;
+            }
+            user.WorkHours += hours;
+            return;
         }
     }
 }
