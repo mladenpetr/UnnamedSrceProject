@@ -504,19 +504,33 @@ namespace SrceApplicaton.Controllers
             return;
         }
 
+        //Metoda koja generira izvještaj za tekući mjesec
+        //Uzimaju se svi poslovi koji su u stanju 1 odn. nisu još obračunati.
+        //Metoda prolazi kroz poslove te u novu txt datoteku zapisuje radne sate
+        //te ukupni broj radnih sati za tekući mjesec.
+        //Po završetku, stanja obrađenih poslova se ažuriraju na 2 (zaključano stanje).
+        //Tehničarima se resetiraju podaci o odrađenim satima te tako započinje praćenje rada u 
+        //sljedećem mjesecu.
         public string CreateReport()
         {
             string data;
             using (var db = new SrceAppDatabase1Entities()) {
                 var jobs = db.Job.Where(m => m.JobState == 1);
                 List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel=="Technician").ToList();
+
+                //Lista koja je indirektno povezana sa listom tehničara a sadrži
+                //listu prijavljenih poslova od tehničara u svakom njenom elementu.
                 List<List<Job>> technicianJobs = new List<List<Job>>();
+
+                //Povezivanje liste tehničara sa listom lista poslova koje su odradili.
                 foreach (var tech in technicians)
                 {
                     technicianJobs.Add(tech.Job.Where(m=>m.JobState==1).ToList());
                 }
+
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string date = DateTime.Now.Month + "-" + DateTime.Now.Year;
+                string month = DateTime.Now.Month < 10 ? "0" + DateTime.Now.Month : DateTime.Now.Month.ToString();
+                string date = month + "-" + DateTime.Now.Year;
                 string filePath = desktopPath + "\\Izvještaj_"+date+".txt";
                 if (!System.IO.File.Exists(filePath))
                 {
@@ -572,7 +586,7 @@ namespace SrceApplicaton.Controllers
                     }
                     foreach (var tech in technicians)
                     {
-                        tech.WorkHours = 0;
+                        UpdateSalary(tech);
                     }
                     db.SaveChanges();
                     data = "Izvještaj je generiran i dostupan na radnoj površini!";
@@ -596,9 +610,15 @@ namespace SrceApplicaton.Controllers
             return hours.ToString();
         }
 
-        //TODO 
-        //METODA UPDATESALARY kojom manipuliramo atributima :
-        //ThisMonthSalary, LastMonthSalary i ThisYearSalary
-        //U tablici technician
+        private void UpdateSalary(Technician technician)
+        {
+            int HOURLY_RATE = 25;
+            technician.LastMonthSalary = technician.ThisMonthSalary;
+            technician.ThisMonthSalary = (byte)((int)technician.WorkHours * HOURLY_RATE);
+            technician.ThisYearSalary += technician.ThisMonthSalary;
+            technician.WorkHours = 0;
+            return;
+        }
+
     }
 }
