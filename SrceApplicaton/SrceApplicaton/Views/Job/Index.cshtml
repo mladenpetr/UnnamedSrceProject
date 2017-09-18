@@ -198,7 +198,21 @@
                     success: function () {
                         $('#calendar').fullCalendar('refetchEvents');
                     }
-                })
+                }).fail(function () {
+                    alert("Dogodila se greška!")
+                });
+            }
+
+            function createReport() {
+                var urltoAction = '@Url.Action("CreateReport","Job")'
+                $.ajax({
+                    url: urltoAction,
+                    success: function (data) {
+                        alert(data);
+                    }
+                }).fail(function () {
+                    alert('Dogodila se greška!')
+                });
             }
 
 
@@ -312,7 +326,7 @@
                         }
                     }
                 },
-				
+
 				//Ukoliko na eventu postoji radnik(title!=null) onda se prikazuje
                 //tooltip sa dodatnim biljeskama
                 eventMouseover: function (event, jsEvent, view) {
@@ -366,6 +380,9 @@
             </div>
             <div>
                 <button class="btn-danger" onclick="assignTechnicians()">Raspodjeli tehničare</button>
+            </div>
+            <div>
+                <button class="btn-danger" onclick="createReport()">Generiraj izvještaj</button>
             </div>
             <div class="fc-popover edit" style="z-index:10;display:none">
                 <ul>
