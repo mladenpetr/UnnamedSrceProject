@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using SrceApplicaton.Models;
-using System.Data.Entity;
 using System.Web.Script.Serialization;
 using System.Web.Services;
 using System.Text;
+using System.IO;
+using System.Collections;
 
 namespace SrceApplicaton.Controllers
 {
@@ -71,7 +71,7 @@ namespace SrceApplicaton.Controllers
                         EndingHour = endTime,
                         JobDate = DateTime.Parse(start.Split('T')[0]),
                         JobState = 0,
-                        TechnicianNumber = 2
+                        TechnicianNumber = 1
                     };
                     db.Job.Add(newJob);
                     db.SaveChanges();
@@ -489,6 +489,8 @@ namespace SrceApplicaton.Controllers
             return;
         }
 
+        //Metoda koja ažurira broj sati posla tehničaru koji ga radi.
+        //Parametri koje funkcija prima su instance posla i tehničara koji je dodjeljen tom poslu.
         private void UpdateHours(Technician user, Job job)
         {
             byte hours = 0;
@@ -501,5 +503,122 @@ namespace SrceApplicaton.Controllers
             user.WorkHours += hours;
             return;
         }
+
+        //Metoda koja generira izvještaj za tekući mjesec
+        //Uzimaju se svi poslovi koji su u stanju 1 odn. nisu još obračunati.
+        //Metoda prolazi kroz poslove te u novu txt datoteku zapisuje radne sate
+        //te ukupni broj radnih sati za tekući mjesec.
+        //Po završetku, stanja obrađenih poslova se ažuriraju na 2 (zaključano stanje).
+        //Tehničarima se resetiraju podaci o odrađenim satima te tako započinje praćenje rada u 
+        //sljedećem mjesecu.
+        public string CreateReport()
+        {
+            string data;
+            using (var db = new SrceAppDatabase1Entities()) {
+                var jobs = db.Job.Where(m => m.JobState == 1);
+                List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel=="Technician").ToList();
+
+                //Lista koja je indirektno povezana sa listom tehničara a sadrži
+                //listu prijavljenih poslova od tehničara u svakom njenom elementu.
+                List<List<Job>> technicianJobs = new List<List<Job>>();
+
+                //Povezivanje liste tehničara sa listom lista poslova koje su odradili.
+                foreach (var tech in technicians)
+                {
+                    technicianJobs.Add(tech.Job.Where(m=>m.JobState==1).ToList());
+                }
+
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string month = DateTime.Now.Month < 10 ? "0" + DateTime.Now.Month : DateTime.Now.Month.ToString();
+                string date = month + "-" + DateTime.Now.Year;
+                string filePath = desktopPath + "\\Izvještaj_"+date+".txt";
+                if (!System.IO.File.Exists(filePath))
+                {
+                    if (jobs.Count() == 0)
+                    {
+                        data = "Ovaj mjesec ne postoji niti jedan odrađeni posao.";
+                        return data;
+                    }
+                    using (StreamWriter sw = new StreamWriter(filePath))
+                    {
+                        foreach (var tech in technicians)
+                        {
+                            sw.Write("\t"+tech.LastName);
+                        }
+                        sw.WriteLine();
+                        var maxCount = 0;
+                        foreach (var job in technicianJobs)
+                        {
+                            if (maxCount < job.Count)
+                            {
+                                maxCount = job.Count;
+                            }
+                        }
+                        for (int i = 0; i < maxCount; i++)
+                        {
+                            foreach (var tech in technicianJobs)
+                            {
+                                if (i < tech.Count)
+                                {
+                                    sw.Write("\t" + GetHours(tech[i]));
+                                } else
+                                {
+                                    sw.Write("\t" + " ");
+                                }
+                            }
+                            sw.WriteLine();
+                        }
+                        sw.Write("Ukupno: ");
+                        int j = 0;
+                        foreach (var tech in technicians)
+                        {
+                            if (j != 0)
+                            {
+                                sw.Write("\t");
+                            }
+                            sw.Write(tech.WorkHours);
+                            j++;
+                        }
+                    }
+                    foreach (var job in jobs)
+                    {
+                        job.JobState = 2;
+                    }
+                    foreach (var tech in technicians)
+                    {
+                        UpdateSalary(tech);
+                    }
+                    db.SaveChanges();
+                    data = "Izvještaj je generiran i dostupan na radnoj površini!";
+                } else
+                {
+                    data = "Izvještaj za ovaj mjesec je već napravljen i nalazi se na radnoj površini.";
+                }
+            }
+            return data;
+        }
+
+        private string GetHours(Job job)
+        {
+            byte hours;
+            var diff = job.EndingHour.Subtract(job.StartingHour);
+            hours = (byte)diff.Hours;
+            if (diff.Minutes != 0)
+            {
+                hours++;
+            }
+            return hours.ToString();
+        }
+
+        private void UpdateSalary(Technician technician)
+        {
+            int HOURLY_RATE = 25;
+            technician.LastMonthSalary = technician.ThisMonthSalary;
+            technician.ThisMonthSalary = (byte)((int)technician.WorkHours * HOURLY_RATE);
+            technician.ThisYearSalary += technician.ThisMonthSalary;
+            technician.WorkHours = 0;
+            return;
+        }
+
     }
 }
