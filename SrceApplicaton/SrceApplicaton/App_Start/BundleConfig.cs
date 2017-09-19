@@ -15,6 +15,7 @@ namespace SrceApplicaton.App_Start
                 .Include("~/Content/css/icheck/blue.min.css", new CssRewriteUrlTransformAbsolute())
                 .Include("~/Content/css/AdminLTE.css", new CssRewriteUrlTransformAbsolute())
                 .Include("~/Content/css/skins/*.css")
+                .Include("~/Content/css/srce.css")
                 .Include("~/Content/fullcalendar.css"));
 
             bundles.Add(new ScriptBundle("~/Bundles/js")

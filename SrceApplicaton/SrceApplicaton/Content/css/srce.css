@@ -1,0 +1,27 @@
+/*
+    Custom CSS for Srce Web app
+*/
+
+@media screen and (max-width: 767px){
+    .buttoncenter{
+        position: relative;
+        top: 23vh;
+        left: 22vw;
+    }
+    .textcenter{
+        position: relative;
+        left: 30vw;
+    }
+}
+
+@media screen and (min-width: 768px){
+    .buttoncenter{
+        position: relative;
+        top: 30vh;
+        left: 35vw;
+    }
+    .textcenter {
+        position: relative;       
+        left: 37vw;
+    }
+}
