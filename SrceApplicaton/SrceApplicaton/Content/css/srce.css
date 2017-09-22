@@ -2,6 +2,11 @@
     Custom CSS for Srce Web app
 */
 
+
+ /*
+    Responsive* button centering
+     Note: Kada vidimo kako izgleda sve na mobitelima budemo poravnali sve kako spada. Za sada je najbitiniji Desktop version.
+ */
 @media screen and (max-width: 767px){
     .buttoncenter{
         position: relative;
@@ -24,4 +29,21 @@
         position: relative;       
         left: 37vw;
     }
+}
+
+/*
+    Menu na kalendaru
+*/
+.prazno{
+    list-style: none;
+}
+.liststyle {
+    padding: 30px;
+    background-color: #cb2f2f;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 10px 10px 5px #888888;
+}
+.button1{
+    padding: 10px;
 }

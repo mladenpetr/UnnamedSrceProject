@@ -7,7 +7,8 @@
 <!--fullcalendar scripts-->
 <head>
     <link rel='stylesheet' href='~/Content/fullcalendar.css' />
-    <link rel='stylesheet' hrel='~/themes/base/jquery-ui.css' />
+    <link rel='stylesheet' href='~/themes/base/jquery-ui.css' />
+    <link rel="stylesheet" href="~/Content/css/srce.css" />
     <script src='~/Scripts/jquery-3.1.1.min.js'></script>
     <script src='~/Scripts/moment.min.js'></script>
     <script src='~/Scripts/fullcalendar.js'></script>
@@ -385,10 +386,10 @@
                 <button class="btn-danger" onclick="createReport()">Generiraj izvještaj</button>
             </div>
             <div class="fc-popover edit" style="z-index:10;display:none">
-                <ul>
-                    <li><button class="fc-button" onclick="showTemplates()">Dodaj rekonfiguraciju</button></li>
-                    <li><button class="fc-button" onclick="editEvent()">Uredi posao</button></li>
-                    <li><button class="fc-button" onclick="deleteEvent()">Izbriši posao</button></li>
+                <ul class="prazno liststyle">
+                    <li class="button1"><button class="fc-button" onclick="showTemplates()">Dodaj rekonfiguraciju</button></li>
+                    <li class="button1"><button class="fc-button" onclick="editEvent()">Uredi posao</button></li>
+                    <li class="button1"><button class="fc-button" onclick="deleteEvent()">Izbriši posao</button></li>
                 </ul>
             </div>
         }
