@@ -61,13 +61,13 @@
                 @{
                     var colorList = new List<SelectListItem>()
                     {
-                        new SelectListItem { Value = "#dd0d0d" , Text = "Red"  },
-                        new SelectListItem { Value = "#1417ce" , Text = "Blue" },
-                        new SelectListItem { Value = "#2ba81f" , Text = "Green"},
-                        new SelectListItem { Value = "#d7ef21" , Text = "Yellow"},
-                        new SelectListItem { Value = "#f7a71d" , Text = "Orange"},
-                        new SelectListItem { Value = "#ad1aa5" , Text = "Purple"},
-                        new SelectListItem { Value = "#27dddd" , Text = "Cyan"}
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Red.Value, Text = "Red"  },
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Blue.Value , Text = "Blue" },
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Green.Value , Text = "Green"},
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Yellow.Value , Text = "Yellow"},
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Orange.Value , Text = "Orange"},
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Purple.Value , Text = "Purple"},
+                        new SelectListItem { Value = SrceApplicaton.Models.Colors.Cyan.Value , Text = "Cyan"}
                     };
                 }
                 @Html.DropDownListFor(model => model.Color, colorList, new { htmlAttributes = new { @class = "form-control" } })

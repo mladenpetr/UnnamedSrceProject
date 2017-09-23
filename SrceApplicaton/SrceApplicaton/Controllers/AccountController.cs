@@ -62,7 +62,7 @@ namespace SrceApplicaton.Controllers
                         email = model.email,
                         Username = model.Username,
                         Password = storedPassword,
-                        AccessLevel = "Technician",
+                        AccessLevel = AccessLevel.Technician.Value,
                         WorkHours = 0,
                         ThisMonthSalary = 0,
                         LastMonthSalary = 0,

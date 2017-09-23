@@ -309,6 +309,7 @@
     <Compile Include="Controllers\TemplateController.cs" />
     <Compile Include="Models\AccountViewModel.cs" />
     <Compile Include="Models\ComplexTemplateModel.cs" />
+    <Compile Include="Models\Enums.cs" />
     <Compile Include="Models\Job.cs">
       <DependentUpon>Model1.tt</DependentUpon>
     </Compile>

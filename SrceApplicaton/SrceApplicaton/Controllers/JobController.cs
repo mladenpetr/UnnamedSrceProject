@@ -70,7 +70,7 @@ namespace SrceApplicaton.Controllers
                         StartingHour = startTime,
                         EndingHour = endTime,
                         JobDate = DateTime.Parse(start.Split('T')[0]),
-                        JobState = 0,
+                        JobState = (byte) JobStates.Unassigned,
                         TechnicianNumber = 1
                     };
                     db.Job.Add(newJob);
@@ -460,7 +460,7 @@ namespace SrceApplicaton.Controllers
                 {
                     return "Svi trenutni poslovi su raspodjeljeni!";
                 }
-                var allTechnicians = CalculatePotentialHours(db.Technician.Where(m=>m.AccessLevel=="Technician").ToList(), jobs);
+                var allTechnicians = CalculatePotentialHours(db.Technician.Where(m=>m.AccessLevel==AccessLevel.Technician.Value).ToList(), jobs);
                 foreach (var job in jobs)
                 {
                     var technicians = job.Technician.ToList();
@@ -484,7 +484,7 @@ namespace SrceApplicaton.Controllers
                     {
                         job.Color = job.Technician.First().Color;
                     }
-                    job.JobState = 1;
+                    job.JobState = (byte)JobStates.Unlocked;
                     UpdatePotentialHours(allTechnicians,orderedTechnicians,job);
                 }
                 db.SaveChanges();
@@ -567,7 +567,7 @@ namespace SrceApplicaton.Controllers
             string data;
             using (var db = new SrceAppDatabase1Entities()) {
                 var jobs = db.Job.Where(m => m.JobState == 2);
-                List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel=="Technician").ToList();
+                List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel==AccessLevel.Technician.Value).ToList();
 
                 //Lista koja je indirektno povezana sa listom tehničara a sadrži
                 //listu prijavljenih poslova od tehničara u svakom njenom elementu.
@@ -633,7 +633,7 @@ namespace SrceApplicaton.Controllers
                     }
                     foreach (var job in jobs)
                     {
-                        job.JobState = 2;
+                        job.JobState = (byte) JobStates.Archived;
                     }
                     foreach (var tech in technicians)
                     {
