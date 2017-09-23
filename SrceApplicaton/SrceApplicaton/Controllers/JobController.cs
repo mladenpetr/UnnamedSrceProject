@@ -351,6 +351,26 @@ namespace SrceApplicaton.Controllers
             return RedirectToAction("Index");
         }
 
+        public string LockJob(int id)
+        {
+            using (var db = new SrceAppDatabase1Entities())
+            {
+                Job job = db.Job.Find((short)id);
+                if (job.JobState == (byte)JobStates.Locked)
+                {
+                    return "Posao je već zaključan!";
+                }
+                byte jobDuration = Byte.Parse(GetHours(job));
+                foreach (var technician in job.Technician)
+                {
+                    technician.WorkHours += jobDuration;
+                }
+                job.JobState = (byte)JobStates.Locked;
+                db.SaveChanges();
+            }
+            return "Posao je završen, radni sati za ovaj dan su obračunati!";
+        }
+
         //Metoda koja uzima sve poslove na koje je korisnik prijavljen te ih vraća u
         //Javascript funkciju koja ju je pozvala.
         [WebMethod]
@@ -455,7 +475,7 @@ namespace SrceApplicaton.Controllers
         {
             using (var db = new SrceAppDatabase1Entities())
             {
-                var jobs = db.Job.Where(m => m.JobState == 0).ToList();
+                var jobs = db.Job.Where(m => m.JobState == (byte)JobStates.Unassigned).ToList();
                 if (jobs.Count == 0)
                 {
                     return "Svi trenutni poslovi su raspodjeljeni!";
@@ -484,7 +504,7 @@ namespace SrceApplicaton.Controllers
                     {
                         job.Color = job.Technician.First().Color;
                     }
-                    job.JobState = (byte)JobStates.Unlocked;
+                    job.JobState = (byte)JobStates.Assigned;
                     UpdatePotentialHours(allTechnicians,orderedTechnicians,job);
                 }
                 db.SaveChanges();
@@ -566,7 +586,7 @@ namespace SrceApplicaton.Controllers
         {
             string data;
             using (var db = new SrceAppDatabase1Entities()) {
-                var jobs = db.Job.Where(m => m.JobState == 2);
+                var jobs = db.Job.Where(m => m.JobState == (byte)JobStates.Locked);
                 List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel==AccessLevel.Technician.Value).ToList();
 
                 //Lista koja je indirektno povezana sa listom tehničara a sadrži
@@ -576,7 +596,7 @@ namespace SrceApplicaton.Controllers
                 //Povezivanje liste tehničara sa listom lista poslova koje su odradili.
                 foreach (var tech in technicians)
                 {
-                    technicianJobs.Add(tech.Job.Where(m=>m.JobState==1).ToList());
+                    technicianJobs.Add(tech.Job.Where(m=>m.JobState==(byte)JobStates.Locked).ToList());
                 }
 
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);

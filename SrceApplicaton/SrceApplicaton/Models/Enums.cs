@@ -9,7 +9,7 @@ namespace SrceApplicaton.Models
     public enum JobStates
     {
         Unassigned = 0,
-        Unlocked = 1,
+        Assigned = 1,
         Locked = 2,
         Archived = 3,
     }

@@ -175,7 +175,32 @@
                             $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
                         }
                     }
+                } else if (calEvent.jobState == 1) {
+                    $('.check-in').hide();
+                    $('.check-out').hide();
+                    if (isJobChecked(calEvent, techEvents)) {
+                        if ($('.lock').is(':visible')) {
+                            $('.lock').hide();
+                        } else {
+                            $('.lock').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                        }
+                    }
                 }
+            }
+
+            function lockJob() {
+                var urltoAction = '@Url.Action("LockJob", "Job")';
+                $.ajax({
+                    url: urltoAction,
+                    data: {
+                        'id': currentEvent.id
+                    }
+                }).done(function (data) {
+                    $('.lock').hide();
+                    alert(data);
+                }).fail(function () {
+                    alert('Dogodila se greška!')
+                });
             }
 
         // provjera da li je tehničar već odabrao kliknuti posao
@@ -401,6 +426,10 @@
             <div class="fc-popover check-out" style="z-index:10;display:none">
                 <button class="fc-button" onclick="checkOut()">Odjavi posao</button>
             </div>
+            <div class="fc-popover lock" style="z-index:10;display:none">
+                <button class="fc-button" onclick="lockJob()">Zaključaj posao</button>
+            </div>
+
         }
     }
 
