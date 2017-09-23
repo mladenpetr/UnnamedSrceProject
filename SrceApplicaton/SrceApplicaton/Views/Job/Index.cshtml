@@ -195,7 +195,8 @@
                 var urltoAction = '@Url.Action("AssignTechnicians","Job")'
                 $.ajax({
                     url: urltoAction,
-                    success: function () {
+                    success: function (data) {
+                        alert(data);
                         $('#calendar').fullCalendar('refetchEvents');
                     }
                 }).fail(function () {

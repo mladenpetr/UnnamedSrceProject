@@ -448,45 +448,96 @@ namespace SrceApplicaton.Controllers
         }
 
         //Metoda koja raspodjeljuje tehničarima poslova
-        //Glavni (i trenutno jedini) kriterij je broj odrađenih sati ovaj mjesec
+        //Kriterij pri dodjeljivanju posla je broj odrađenih sati ovaj mjesec zbrojen sa brojem potencijalnih radnih sati
+        //Potencijalni radni sati označavaju vrijednost u slučaju da tehničar radi svaki posao za koji se prijavio u tekućem tjednu.
         //cilj je ravnomjerno raspodjeliti sate tehničarima tako da na kraju mjeseca imaju relativno slične plaće
-        public void AssignTechnicians()
+        public string AssignTechnicians()
         {
             using (var db = new SrceAppDatabase1Entities())
             {
-                var jobs = db.Job.Where(m => m.JobState == 0);
+                var jobs = db.Job.Where(m => m.JobState == 0).ToList();
+                if (jobs.Count == 0)
+                {
+                    return "Svi trenutni poslovi su raspodjeljeni!";
+                }
+                var allTechnicians = CalculatePotentialHours(db.Technician.Where(m=>m.AccessLevel=="Technician").ToList(), jobs);
                 foreach (var job in jobs)
                 {
                     var technicians = job.Technician.ToList();
-                    var orderedTechnicians = technicians.OrderBy(m => m.WorkHours).ToArray();
+                    var orderedTechnicians = GetSignedTechnicians(allTechnicians, technicians);
                     for (int i = technicians.Count - 1; i >= job.TechnicianNumber; i--)
                     {
                         var user = orderedTechnicians[i];
                         List<string> title = job.Title.Split(new string[] { ", " }, StringSplitOptions.None).ToList();
-                        int indexSubstring = title.IndexOf(user.Name + " " + user.LastName);
+                        int indexSubstring = title.IndexOf(user.Key.Name + " " + user.Key.LastName);
                         if (indexSubstring == 0)
                         {
-                            job.Title = job.Title.Replace(user.Name + " " + user.LastName + ", ", "");
+                            job.Title = job.Title.Replace(user.Key.Name + " " + user.Key.LastName + ", ", "");
                         }
                         else
                         {
-                            job.Title = job.Title.Replace(", " + user.Name + " " + user.LastName, "");
+                            job.Title = job.Title.Replace(", " + user.Key.Name + " " + user.Key.LastName, "");
                         }
-                        job.Technician.Remove(user);
+                        job.Technician.Remove(user.Key);
                     }
                     if (job.TechnicianNumber == 1)
                     {
                         job.Color = job.Technician.First().Color;
                     }
-                    foreach (Technician user in job.Technician)
-                    {
-                        UpdateHours(user, job);
-                    }
                     job.JobState = 1;
+                    UpdatePotentialHours(allTechnicians,orderedTechnicians,job);
                 }
                 db.SaveChanges();
             }
+            return "Tehničari su uspješno raspodjeljeni!";
+        }
+
+        //Metoda koja ažurira potencijalni broj radnih sati od tehničara.
+        //Svakom tehničaru koji nije odabran za posao job smanjuje se potencijalni broj radnih sati u skladu s trajanjem posla.
+        private void UpdatePotentialHours(List<KeyValuePair<Technician, byte>> allTechnicians, List<KeyValuePair<Technician, byte>>  ordered,Job job)
+        {
+            foreach (var pair in ordered)
+            {
+                if (!job.Technician.Contains(pair.Key))
+                {
+                    allTechnicians[allTechnicians.IndexOf(pair)] = new KeyValuePair<Technician,byte>(pair.Key, (byte)(pair.Value - Byte.Parse(GetHours(job))));
+                }
+            }
             return;
+        }
+
+        //Metoda koja vraća Listu uređenih parova - Tehničar, potencijalni sati - popunjenu sa svim tehničarima koji rade na trenutnom poslu.
+        //technicians parametar sadrži tehničare zapisane za trenutni posao.
+        private List<KeyValuePair<Technician,byte>> GetSignedTechnicians(List<KeyValuePair<Technician, byte>> allTechnicians, List<Technician> technicians)
+        {
+            List<KeyValuePair<Technician, byte>> signedTechnicians = new List<KeyValuePair<Technician, byte>>();
+            foreach (var tech in allTechnicians)
+            {
+                if (technicians.Contains(tech.Key))
+                {
+                    signedTechnicians.Add(tech);
+                }
+            }
+            return signedTechnicians.OrderBy(m => m.Value).ToList();
+        }
+
+        //Metoda koja računa broj potencijalnih sati za svakog tehničara te dobivene podatke sprema u dictionary.
+        //Na kraju se dictionary sortira te kao lista ključ-vrijednost parova vraća.
+        private List<KeyValuePair<Technician,byte>> CalculatePotentialHours(List<Technician> technicians,List<Job> jobs)
+        {
+            Dictionary<Technician, byte> techPotentialHours = new Dictionary<Technician, byte>();
+            foreach (Technician tech in technicians)
+            {
+                byte potentialHours = 0;
+                List<Job> techJobs = jobs.Where(m => m.Technician.Contains(tech)).ToList();
+                foreach (Job job in techJobs)
+                {
+                    potentialHours += Byte.Parse(GetHours(job));
+                }
+                potentialHours += (byte)tech.WorkHours;
+                techPotentialHours.Add(tech, potentialHours);
+            }
+            return techPotentialHours.ToList();
         }
 
         //Metoda koja ažurira broj sati posla tehničaru koji ga radi.
@@ -515,7 +566,7 @@ namespace SrceApplicaton.Controllers
         {
             string data;
             using (var db = new SrceAppDatabase1Entities()) {
-                var jobs = db.Job.Where(m => m.JobState == 1);
+                var jobs = db.Job.Where(m => m.JobState == 2);
                 List<Technician> technicians = db.Technician.Where(m=>m.AccessLevel=="Technician").ToList();
 
                 //Lista koja je indirektno povezana sa listom tehničara a sadrži
