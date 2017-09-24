@@ -129,7 +129,8 @@
             //Poziva se akcija CheckOut u JobControlleru koja briše
             //međusobnu poveznicu korisnika i odabranog posla.
             function checkOut() {
-                var urltoAction = '@Url.Action("CheckOut", "Job")';
+                if (confirm("Jeste li sigurni da želite odjaviti posao?")){
+                    var urltoAction = '@Url.Action("CheckOut", "Job")';
                     $.ajax({
                         url: urltoAction,
                         data: {
@@ -139,8 +140,10 @@
                         $('.check-out').hide();
                         $('#calendar').fullCalendar('refetchEvents');
                     }).fail(function () {
-                            alert('Dogodila se greška!')
+                        alert('Dogodila se greška!')
                         });
+                    $('.fc-popover').hide();
+                }
             }
 
         //Prikazivanje dosad dodanih templateova za rekonfiguraciju.
@@ -184,10 +187,21 @@
                         } else {
                             $('.lock').css({ 'top': mouseY, 'left': mouseX }).show('slow');
                         }
+                    } else {
+                        $('.lock').hide();
+                    } 
+                } else if (calEvent.jobState == 4) {
+                    $('.lock').hide();
+                    if (!isJobChecked(calEvent, techEvents)) {
+                        $('.check-in').css({ 'top': mouseY, 'left': mouseX }).show('slow');
+                    } else {
+                        $('.check-out').css({ 'top': mouseY, 'left': mouseX }).show('slow');
                     }
                 }
             }
 
+        //Zaključavanje posla odn. dojava aplikaciji da je posao odrađen.
+        //Ovdje se obračunavaju radni sati za taj dan.
             function lockJob() {
                 var urltoAction = '@Url.Action("LockJob", "Job")';
                 $.ajax({
@@ -349,6 +363,8 @@
                         }
                         else if ($('.check-out').is(':visible')) {
                             $('.check-out').hide();
+                        } else if ($('.lock').is(':visible')) {
+                            $('.lock').hide();
                         }
                     }
                 },
@@ -427,7 +443,10 @@
                 <button class="fc-button" onclick="checkOut()">Odjavi posao</button>
             </div>
             <div class="fc-popover lock" style="z-index:10;display:none">
-                <button class="fc-button" onclick="lockJob()">Zaključaj posao</button>
+                <ul>
+                    <li><button class="fc-button" onclick="checkOut()">Odjavi posao</button></li>
+                    <li><button class="fc-button" onclick="lockJob()">Zaključaj posao</button></li>
+                </ul>
             </div>
 
         }

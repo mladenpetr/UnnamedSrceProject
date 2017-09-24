@@ -12,6 +12,7 @@ namespace SrceApplicaton.Models
         Assigned = 1,
         Locked = 2,
         Archived = 3,
+        SwapRequest = 4,
     }
 
     public sealed class AccessLevel

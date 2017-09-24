@@ -269,20 +269,32 @@ namespace SrceApplicaton.Controllers
 			{
 
 				Job job = db.Job.Find((short)id);
-				if (job.Title == null)
+                if (job == null)
+                {
+                    new EntryPointNotFoundException();
+                }
+
+                //Ako je posao u stanju traženja zamjene posla i s ovim check-in zahtjevom su se popunila mjesta
+                //onda vrati stanje u dodjeljeno. (Uzima se broj tehničara - 1 jer ovaj sad nije još u potpunosti spremljen u bazi).
+                if (job.JobState == (byte)JobStates.SwapRequest && job.Technician.Count == (job.TechnicianNumber - 1))
+                {
+                    job.JobState = (byte)JobStates.Assigned;
+                }
+                if (job.Title == null)
 				{
 					job.Title = user.Name + " " + user.LastName;
-					job.Color = user.Color;
+                    if (!(job.JobState == (byte)JobStates.SwapRequest))
+                    {
+                        job.Color = user.Color;
+                    }
 				}
 				else
 				{
 					job.Title += ", " + user.Name + " " + user.LastName;
-					job.Color = "#9f00ff";
-				}
-				
-				if (job == null)
-				{
-					new EntryPointNotFoundException();
+                    if (!(job.JobState == (byte)JobStates.SwapRequest))
+                    {
+                        job.Color = "#9f00ff";
+                    }
 				}
 				if (ModelState.IsValid)
 				{
@@ -341,6 +353,14 @@ namespace SrceApplicaton.Controllers
 						job.Color = null; //Ako nema prijavljenih tehničara onda se vraća defaultni event
 						job.Title = null;
 						job.JobNotes = null;
+                        if (job.JobState == 1 || job.JobState == 4)
+                        {
+                            job.Color = Colors.Red.Value;
+                            if (job.JobState == 1)
+                            {
+                                job.JobState = (byte)JobStates.SwapRequest;
+                            }
+                        }
 					}
 	
 					db.SaveChanges();
